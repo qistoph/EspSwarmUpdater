@@ -101,9 +101,10 @@
 		input.attr("required", options.required?"required":undefined);
 		input.attr("id", options.id);
 		input.attr("name", options.name);
+		input.attr("value", options.value);
 		input.attr("pattern", options.pattern);
 		if(options.disabled) {
-			input.attr("disabled", "disabled");
+			input.attr("readonly", "readonly");
 		}
 		return inputRow(options, input);
 	};//}}}
@@ -137,7 +138,7 @@
 		for (let [value, label] of Object.entries(options.options)) {
 			select.append($("<option>").attr("value",value).text(label));
 		}
-		select.val(options.selected);
+		select.val(options.value);
 		return inputRow(options, select);
 	};
 

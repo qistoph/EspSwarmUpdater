@@ -220,8 +220,9 @@ function addRow_image(data, idx) {
 			<td>${data["md5"]}</td>
 			<td>${data["version"]||""}</td>
 			<td>${data["filename"]||""}</td>
-			<td>??TODO:SIGNED??</td>
+			<td>${data["signed"]?"Yes":"No"}</td>
 		</tr>`);
+	//TODO: signed: yes/no => valid/invalid/no
 
 	var buttonsTd = $('<td class="text-right" style="white-space: nowrap"></td>');
 	buttonsTd.append(object_buttons('image', key));
@@ -268,12 +269,16 @@ function btnDelete_click(e){
 	});
 }
 
+function btnAdd_click(e) {
+	var type = $(e.delegateTarget).data("type");
+	showEditPrompt(type, true);
+}
+
 function btnEdit_click(e) {
 	var d = $(e.delegateTarget).data();
-	console.log(d);
-	bootbox.alert({
-		title: `Edit ${d["type"]} ${d["id"]}`,
-		message: "Here we should edit the unit"
+	//TODO: show spinner while loading?
+	api[d.type].get(d.id).done((data) => {
+		showEditPrompt(d.type, false, data);
 	});
 }
 
@@ -299,13 +304,7 @@ $(function() {
 		$(document.body).append(h2).append(table);
 	});
 
-	$(".deletebtn").on("click", btnDelete_click);// TODO: remove when deletebtns are removed from HTML
-	$(".editbtn").on("click", btnEdit_click);// TODO: remove when editbtns are removed from HTML
-	$(".addbtn").on("click", function(e) {
-		var type = $(e.delegateTarget).data("type");
-
-		showEditPrompt(type, true);
-	});
+	$(".addbtn").on("click", btnAdd_click);
 
 	refresh("device");
 	refresh("category");
@@ -314,7 +313,6 @@ $(function() {
 
 function add_failed_generator(type, name, input) {
 	return function() {
-		console.error(`Add ${type} ${name} failed:`, arguments, input);
 		bootbox.alert({
 			title: $("<div>").text(`Add ${type} ${name} failed`).html(),
 			message: "An error occured while adding. Please try again."
@@ -366,14 +364,15 @@ function emptyToUndef(data) {
 	return data;
 }
 
-function generateAddCompleteHandler(type, nameField) {
+function generateAddCompleteHandler(type, idField) {
 	return function(dialog, form) {
 		var data = getFormData($(form));
 		data = emptyToUndef(data);
 		api[type].add(data).done(function() {
+			//TODO: fetch paginated part with new entry
 			refresh(type);
 		}).fail(
-			add_failed_generator(type, data[nameField], data)
+			add_failed_generator(type, data[idField], data)
 		).always(function() {
 			dialog.modal("hide");
 		});
@@ -383,7 +382,28 @@ function generateAddCompleteHandler(type, nameField) {
 	};
 }
 
-function showEditPrompt(type, isnew, callback) {
+function generateEditCompleteHandler(type, idField, idValue) {
+	return function(dialog, form) {
+		var data = getFormData($(form));
+		data = emptyToUndef(data);
+		api[type].put(idValue, data).done(function() {
+			//TODO: fetch paginated part with new entry
+			refresh(type);
+		}).fail(function() {
+			bootbox.alert({
+				title: `Save ${type} ${data[idField]} failed`,
+				message: "An error occured while saving. Please try again."
+			});
+		}).always(function() {
+			dialog.modal("hide");
+		});
+
+		$(form).find(":input").prop("disabled", true);
+		return false; // Don't close, we will after callback
+	};
+}
+
+function showEditPrompt(type, isnew, data) {
 	// Skip images without filename (and thus binary)
 	// Allow 'None' selection
 	var images = imagesToMapping(backend.images.filter((img)=>img.filename), true);
@@ -404,10 +424,10 @@ function showEditPrompt(type, isnew, callback) {
 
 		var opts = Object.assign({}, p, {
 			id: "inp_" + inputNr,
+			value: data?data[p.name]:undefined,
 			label: labels.type[type][p.name],
 			disabled: !isnew && (p.flags & api.flags.NO_EDIT)
 		});
-		console.log(opts);
 
 		switch(p.input.type) {
 			case "text":
@@ -438,11 +458,19 @@ function showEditPrompt(type, isnew, callback) {
 		inputNr++;
 	});
 
+	var keyname = api.types[type].key;
+	var handler;
+	if(isnew) {
+		handler = generateAddCompleteHandler(type, keyname);
+	} else {
+		handler = generateEditCompleteHandler(type, keyname, data[keyname]);
+	}
+
 	popform.show({
 		title: "New "+labels[type],
 		inputs: inputs,
-		completed: generateAddCompleteHandler(type, api.types[type].key),
-		//TODO: fetch paginated part with new entry
+		doneText: isnew ? "Create" : "Save",
+		completed: handler,
 	});
 }
 
