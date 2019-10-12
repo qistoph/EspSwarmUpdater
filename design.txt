@@ -1,0 +1,30 @@
+Device:
+- *MAC
+- CurrentImage
+- DesiredImage
+- FirstSeen
+- LastSeen
+
+Category:
+- *Name
+- AutoJoinRules[]
+- DesiredImage
+
+FieldRegexJoinRule:
+- *UUID
+- Field (mac, currentImage, ...?)
+- MatchRegex
+
+Image:
+- *MD5
+- Filename
+- Description
+- VersionString
+- Binary
+
+
+    ,------------------------------,
+	|                             \|/ 1..1
+Category --> 1..* Device --> 1..2 Image
+    |
+    '------> 1..* FieldRegexJoinRule

@@ -1,0 +1,7 @@
+echo -n -prefs "$(/home/chris/arduino-1.8.9/arduino-builder -dump-prefs -logger=humantags -hardware /home/chris/arduino-1.8.9/hardware -hardware /home/chris/Arduino/hardware -tools /home/chris/arduino-1.8.9/tools-builder -tools /home/chris/arduino-1.8.9/hardware/tools/avr -libraries /home/chris/Arduino/libraries -fqbn=esp8266com:esp8266:d1_mini:xtal=80,vt=flash,exception=disabled,ssl=all,eesz=4M2M,ip=lm2f,dbg=Serial,lvl=HTTP_UPDATE,wipe=none,baud=921600 -vid-pid=1A86_7523 -build-path /tmp/arduino_build_chris -warnings=all -build-cache /tmp/arduino_cache_chris -verbose /home/chris/Arduino/BarrelHeight/BarrelHeight.ino | grep '^build.extra_flags=') -DVERSION_STRING=\"BarrelHeight-CLI\""
+
+/home/chris/arduino-1.8.9/arduino-builder -compile -logger=humantags -hardware /home/chris/arduino-1.8.9/hardware -hardware /home/chris/Arduino/hardware -tools /home/chris/arduino-1.8.9/tools-builder -tools /home/chris/arduino-1.8.9/hardware/tools/avr -libraries /home/chris/Arduino/libraries -fqbn=esp8266com:esp8266:d1_mini:xtal=80,vt=flash,exception=disabled,ssl=all,eesz=4M2M,ip=lm2f,dbg=Serial,lvl=HTTP_UPDATE,wipe=none,baud=921600 -vid-pid=1A86_7523 -build-path /tmp/arduino_build_chris -warnings=all -build-cache /tmp/arduino_cache_chris -verbose -prefs "build.extra_flags=-DESP8266 -DVERSION_STRING=\"BarrelHeight-CLI\"" /home/chris/Arduino/BarrelHeight/BarrelHeight.ino
+
+
+https://github.com/arduino/arduino-builder
+https://github.com/arduino/arduino-builder/wiki/Doing-continuous-integration-with-arduino-builder

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+	<!-- Add icon library -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <title>ESP Swarm Updater</title>
+  </head>
+  <body>
+    <h1>ESP Swarm Updater</h1>
+
+	<h2>Devices</h2>
+	<table class="table table-hover" id="table-devices">
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">MAC</th>
+				<th scope="col">Description</th>
+				<th scope="col">First seen</th>
+				<th scope="col">Last seen</th>
+				<th scope="col">Current image</th>
+				<th scope="col">Desired image</th>
+				<th scope="col">Category</th>
+				<th scope="col" class="text-right">
+					<button class="btn btn-primary btn-sm addbtn" data-type="device"><i class="fa fa-plus"></i></button>
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="100%">* desired image set on category</td>
+			</tr>
+			<tr>
+				<td colspan="100%">
+					<span class="cur-page">?</span> / <span class="total-pages">?</span>
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+
+	<h2>Categories</h2>
+	<table class="table table-hover" id="table-categories">
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">Name</th>
+				<th scope="col">Desired Image</th>
+				<th scope="col">Devices</th>
+				<th scope="col" class="text-right">
+					<button class="btn btn-primary btn-sm addbtn" data-type="category"><i class="fa fa-plus"></i></button>
+				</th>
+		</thead>
+		<tbody>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="100%">
+					<span class="cur-page">?</span> / <span class="total-pages">?</span>
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+	
+
+	<h2>Images</h2>
+	<table class="table table-hover" id="table-images">
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">Name</th>
+				<th scope="col">MD5</th>
+				<th scope="col">Version</th>
+				<th scope="col">Filename</th>
+				<th scope="col" class="text-right">
+					<button class="btn btn-primary btn-sm addbtn" data-type="image"><i class="fa fa-plus"></i></button>
+				</th>
+		</thead>
+		<tbody>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="100%">
+					<span class="cur-page">?</span> / <span class="total-pages">?</span>
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+	<!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>-->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
+	<script src="static/libs/bootbox/bootbox.js"></script>
+	<script src="static/libs/bootbox/bootbox.locales.js"></script>
+	<script src="static/libs/moment_js/moment-with-locales.js"></script>
+
+    <script src="static/api.js"></script>
+    <script src="static/ui.js"></script>
+  </body>
+</html>
