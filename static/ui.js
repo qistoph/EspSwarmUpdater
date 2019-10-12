@@ -1,11 +1,75 @@
 'use strict';
 moment.locale('nl-NL');
 
+window.labels = {
+	"type": {
+		"device": {
+			"mac": "MAC",
+			"description": "Description",
+			"first_seen": "First seen",
+			"last_seen": "Last seen",
+			"current_image": "Current image",
+			"desired_image": "Desired image",
+			"category": "Category"
+		},
+		"category": {
+			"name": "Name",
+			"desired_image": "Desired image",
+			"num_devices": "Devices"
+		},
+		"image": {
+			"name": "Name",
+			"md5": "MD5",
+			"version": "Version",
+			"filename": "Filename",
+			"signed": "Signed"
+		}
+	}
+};
+
 var tables = [
 	{
+		"type": "device",
+		"id": "table-devices",
+		"title": "Devices",
+		"columns": [
+			TableColumn("#"),
+			TableColumn(labels.type.device.mac),
+			TableColumn(labels.type.device.description),
+			TableColumn(labels.type.device.first_seen),
+			TableColumn(labels.type.device.last_seen),
+			TableColumn(labels.type.device.current_image),
+			TableColumn(labels.type.device.desired_image),
+			TableColumn(labels.type.device.category),
+			TableColumn(AddButton("device"), {"class":"text-right"}),
+		],
+		"note": "* desired image set on category"
+	},
+	{
 		"type": "category",
+		"id": "table-categories",
 		"title": "Categories",
-
+		"columns": [
+			TableColumn("#"),
+			TableColumn(labels.type.category.name),
+			TableColumn(labels.type.category.desired_image),
+			TableColumn(labels.type.category.num_devices),
+			TableColumn(AddButton("category"), {"class":"text-right"}),
+		]
+	},
+	{
+		"type": "image",
+		"id": "table-images",
+		"title": "Images",
+		"columns": [
+			TableColumn("#"),
+			TableColumn(labels.type.category.name),
+			TableColumn(labels.type.category.md5),
+			TableColumn(labels.type.category.version),
+			TableColumn(labels.type.category.filename),
+			TableColumn(labels.type.category.signed),
+			TableColumn(AddButton("category"), {"class":"text-right"}),
+		]
 	}
 ];
 
@@ -23,6 +87,45 @@ var singular = {
 
 var backend_types = [];
 var backend = {}; // Ref to stored known backend values
+
+function Table(opts) {
+	var table = $(`<table class="table table-hover" id="${opts.id}">`);
+	var head = $("<thead>");
+
+	opts.columns.forEach(function(th) {
+		head.append(th);
+	});
+
+	var foot = $("<tfoot>");
+	if(opts.note) {
+		foot.append($(`<tr><td colspan="100%">${opts.note}</td></tr>`));
+	}
+	foot.append(`<tr><td colspan="100%"><span class="cur-page">?</span> / <span class="total-pages">?</span></td></tr>`);
+
+	table.append(head);
+	table.append($("<tbody>"));
+	table.append(foot);
+	return table;
+}
+
+function TableColumn(label, opts) {
+	var th = $(`<th scopy="col"></th>`);
+	if(typeof(label) == "string") {
+		th.text(label);
+	} else {
+		th.append(label);
+	}
+	opts = Object.assign({}, opts);
+	if(opts.class) {
+		th.addClass(opts.class);
+	}
+	return th;
+}
+
+function AddButton(type) {
+	var btn = $(`<button class="btn btn-primary btn-sm addbtn" data-type="${type}"><i class="fa fa-plus"></i></button>`);
+	return btn;
+}
 
 function highlight_scroll(targets) {
 	$("tr.bg-info").removeClass("bg-info")
@@ -184,6 +287,13 @@ function refresh(type) {
 
 $(function() {
 	// On page load
+	
+	tables.forEach(function(conf) {
+		var h2 = $(`<h2>${conf.title}</h2>`);
+		var table = Table(conf);
+		$(document.body).append(h2).append(table);
+	});
+
 	$(".deletebtn").on("click", btnDelete_click);// TODO: remove when deletebtns are removed from HTML
 	$(".editbtn").on("click", btnEdit_click);// TODO: remove when editbtns are removed from HTML
 	$(".addbtn").on("click", function(e) {
@@ -263,15 +373,6 @@ function generateAddCompleteHandler(type, nameField) {
 		return false; // Don't close, we will after callback
 	};
 }
-
-window.labels = {
-	"type": {
-		"category": {
-			"name": "Name",
-			"desired_image": "Desired Image"
-		}
-	}
-};
 
 //TODO: fetch paginated part with new entry
 var add_prompts = {
