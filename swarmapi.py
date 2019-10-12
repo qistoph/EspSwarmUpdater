@@ -4,6 +4,7 @@ from flask import Blueprint, request, make_response, send_file, redirect, url_fo
 from flask_restful import Api, Resource, abort
 from io import BytesIO
 from base64 import b64decode
+from hashlib import md5 as _md5
 
 import manager
 import swarmdb as DB
@@ -190,7 +191,9 @@ class ImageBinary(Resource):
     def get(self, md5):
         (file_version, file_name, file_md5, file_data) = manager.get_image_data(md5)
         response = make_response(send_file(BytesIO(file_data), as_attachment=True, attachment_filename=file_name))
-        response.headers['X-MD5'] = file_md5
+        # MD5 has to include the signature for verification here
+        # So we're not using file_md5 (which is excluding the signature)
+        response.headers['X-MD5'] = _md5(file_data).hexdigest()
         response.headers['Content-Length'] = len(file_data)
         return response
 
