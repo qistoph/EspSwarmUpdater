@@ -1,11 +1,17 @@
-from flask import Blueprint, request, make_response, send_file, redirect, url_for
-from flask_restful import Api, Resource, abort
-import manager
+import sys
 import json
+from flask import Blueprint, request, make_response, send_file, redirect, url_for, jsonify
+from flask_restful import Api, Resource, abort
 from io import BytesIO
 from base64 import b64decode
 
-from manager import DB
+import manager
+import swarmdb as DB
+
+if sys.version_info[0] != 3 or sys.version_info[1] < 6:
+    print("This script requires Python version 3.6")
+    print("Because of PEP 520 - https://www.python.org/dev/peps/pep-0520/")
+    sys.exit(1)
 
 blueprint = Blueprint('api', __name__)
 api = Api(blueprint)
@@ -13,6 +19,27 @@ api = Api(blueprint)
 @blueprint.route("/")
 def index():
     return 'API index'
+
+def getProps(cls):
+    attrs = map(lambda name:getattr(cls, name), cls.__dict__)
+    for attr in filter(lambda f: isinstance(f, DB.Prop), attrs):
+        yield attr
+
+@blueprint.route("/types")
+def types():
+    ret = []
+    for typ in [DB.Device, DB.Category, DB.Image]:
+        definition = []
+        for prop in getProps(typ):
+            definition.append({
+                "name": prop.name,
+                "pattern": prop.html_pattern,
+                "required": bool(prop.flags & DB.Prop.flags.REQUIRED),
+                "flags": prop.flags,
+                "input": {"type": prop.html_type, "attrs": prop.html_attrs},
+            })
+        ret.append({"name": typ.table, "props": definition})
+    return jsonify(ret)
 
 def paginate(count = None, max_limit = 20): # Factory
     def decorator(func):
@@ -57,8 +84,7 @@ class Device(Resource):
         new_mac = request.json["mac"]
         return self.get(new_mac)
 
-    def delete(self, mac):
-        #TODO input sanitation
+    def delete(self, mac): #TODO input sanitation
         obj = DB.Device.get(mac)
         if obj is None:
             return abort(404)

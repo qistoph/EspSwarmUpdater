@@ -119,17 +119,61 @@ class _DBType(dict):
 
 retype = type(re.compile("Hello, world!"))
 class Prop():
-    def __init__(self, name, validator = None, allow_none = True):
+    __indexCounter = 0
+
+    from enum import IntFlag
+    class flags(IntFlag):
+        REQUIRED = 1,
+        NO_SET = 2,
+        NO_EDIT = 4,
+        READ_ONLY = 6,
+        NEW_ONLY = 4,
+        EDIT_ONLY = 2
+
+    def __init__(self, name, data_type, validator = None, flags = 0, html_pattern = None, html_type = None, html_attrs = None):
+        # To keep order of props
+        self.__index = Prop.__indexCounter
+        Prop.__indexCounter+=1
+
         self.name = name
         self.validator = validator
-        self.allow_none = allow_none
+        self.flags = flags
+
+        self.allow_none = True
+        if self.flags & Prop.flags.REQUIRED:
+            self.allow_none = False
+
+        self.html_attrs = html_attrs
+        if self.html_attrs is None:
+            self.html_attrs = {}
+
+        if html_type is None:
+            if data_type is str:
+                self.html_type = "text"
+            elif data_type is int:
+                self.html_type = "number"
+            elif data_type is float:
+                self.html_type = "number"
+                self.html_attrs["step"] = "0.1"
+            else:
+                self.html_type = "text"
+        else:
+            self.html_type = html_type
+
+        if isinstance(validator, str) and html_pattern is None:
+            self.html_pattern = validator
+        else:
+            self.html_pattern = html_pattern
 
     def validate(self, value):
         #print("Prop.validate:", type(self.validator))
         if self.validator is None:
             return value
-        elif value is None and self.allow_none:
-            return None
+        elif value is None:
+            if self.allow_none:
+                return None
+            else:
+                raise ValueError(f"{self.name} must be set and cannot be None")
         elif type(self.validator) == str:
             if not re.match(self.validator, value):
                 raise ValueError(f"\"{value}\" is not a valid value for {self.name}.")
@@ -150,20 +194,34 @@ class Prop():
         return instance[self.name]
 
     def __set__(self, instance, value):
+        #TODO: maybe check if NEW_ONLY/EDIT_ONLY/READ_ONLY is set
+        #For now they're only used in the front-end
         instance[self.name] = self.validate(value)
 
 class Device(_DBType):
     table = "device"
     key = "mac"
 
-    mac = Prop("mac", re.compile("^[0-9a-f]{2}(:[0-9a-f]{2}){5}$", re.IGNORECASE))
-    description = Prop("description")
+    mac = Prop("mac", str, "^[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}$", Prop.flags.REQUIRED|Prop.flags.NEW_ONLY)
+    description = Prop("description", str)
     first_seen = Prop("first_seen", float)
     last_seen = Prop("last_seen", float)
-    current_version = Prop("current_version")
-    current_image = Prop("current_image", re.compile("^[0-9a-f]{32}$", re.IGNORECASE))
-    desired_image = Prop("desired_image", re.compile("^[0-9a-f]{32}$", re.IGNORECASE))
-    category = Prop("category", "^[a-zA-Z]\w+$")
+    current_version = Prop("current_version", str)
+    current_image = Prop("current_image", str, "^[0-9a-fA-F]{32}$")
+    desired_image = Prop("desired_image", str, "^[0-9a-fA-F]{32}$")
+    category = Prop("category", str, "^[a-zA-Z]\w+$")
+
+    #TODO: automate this (in base/meta class)
+    field_order = [
+        mac,
+        description,
+        first_seen,
+        last_seen,
+        current_version,
+        current_image,
+        desired_image,
+        category
+    ]
 
     @classmethod
     def new(cls, mac, description = None, first_seen = None, last_seen = None, current_version = None, current_image = None, desired_image = None, category = None):
@@ -182,8 +240,8 @@ class Category(_DBType):
     table = "category"
     key = "name"
 
-    name = Prop("name", "^[a-zA-Z]\w+$")
-    desired_image = Prop("desired_image", "^[0-9a-f]{32}$")
+    name = Prop("name", str, "^[a-zA-Z]\w+$")
+    desired_image = Prop("desired_image", str, "^[0-9a-f]{32}$")
 
     @classmethod
     def new(cls, name, desired_image = None):
@@ -196,10 +254,10 @@ class Image(_DBType):
     table = "image"
     key = "md5"
 
-    md5 = Prop("md5", "^[0-9a-f]{32}$")
-    description = Prop("description")
-    version = Prop("version")
-    filename = Prop("filename")
+    md5 = Prop("md5", str, "^[0-9a-f]{32}$")
+    description = Prop("description", str)
+    version = Prop("version", str)
+    filename = Prop("filename", str)
 
     @classmethod
     def new(cls, md5, description = None, version = None, filename = None):

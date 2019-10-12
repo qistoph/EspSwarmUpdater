@@ -89,6 +89,7 @@ function addRow_image(data, idx) {
 			<td>${data["md5"]}</td>
 			<td>${data["version"]||""}</td>
 			<td>${data["filename"]||""}</td>
+			<td>??TODO:SIGNED??</td>
 		</tr>`);
 
 	var buttonsTd = $('<td class="text-right" style="white-space: nowrap"></td>');
