@@ -22,7 +22,7 @@ window.labels = {
 			"num_devices": "Devices"
 		},
 		"image": {
-			"name": "Name",
+			"description": "Description",
 			"md5": "MD5",
 			"version": "Version",
 			"filename": "Filename",
@@ -67,12 +67,12 @@ var tables = [
 		"title": "Images",
 		"columns": [
 			TableColumn("#"),
-			TableColumn(labels.type.image.name),
+			TableColumn(labels.type.image.description),
 			TableColumn(labels.type.image.md5),
 			TableColumn(labels.type.image.version),
 			TableColumn(labels.type.image.filename),
 			TableColumn(labels.type.image.signed),
-			TableColumn(AddButton("category"), {"class":"text-right"}),
+			TableColumn(AddButton("image"), {"class":"text-right"}),
 		]
 	}
 ];
@@ -304,7 +304,7 @@ $(function() {
 	$(".addbtn").on("click", function(e) {
 		var type = $(e.delegateTarget).data("type");
 
-		showEditPrompt(type);
+		showEditPrompt(type, true);
 	});
 
 	refresh("device");
@@ -395,10 +395,19 @@ function showEditPrompt(type, isnew, callback) {
 	var inputNr = 1;
 	var inputs = [];
 	api.types[type].props.forEach(p => {
+		if(isnew) {
+			// Hide NO_SET options on add form
+			if(p.flags & api.flags.NO_SET) {
+				return;
+			}
+		}
+
 		var opts = Object.assign({}, p, {
 			id: "inp_" + inputNr,
 			label: labels.type[type][p.name],
+			disabled: !isnew && (p.flags & api.flags.NO_EDIT)
 		});
+		console.log(opts);
 
 		switch(p.input.type) {
 			case "text":
@@ -406,6 +415,9 @@ function showEditPrompt(type, isnew, callback) {
 				break;
 			case "number":
 				inputs.push(popform.NumberInput(opts));
+				break;
+			case "checkbox":
+				inputs.push(popform.CheckboxInput(opts));
 				break;
 			case "datetime":
 				inputs.push(popform.DateTimeInput(opts));

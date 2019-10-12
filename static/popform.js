@@ -102,6 +102,9 @@
 		input.attr("id", options.id);
 		input.attr("name", options.name);
 		input.attr("pattern", options.pattern);
+		if(options.disabled) {
+			input.attr("disabled", "disabled");
+		}
 		return inputRow(options, input);
 	};//}}}
 
@@ -109,6 +112,15 @@
 		var row = exports.TextInput(options);
 		var input = row.find("input");
 		input.attr("type", "number");
+		return row;
+	};
+
+	exports.CheckboxInput = function(options) {
+		var row = exports.TextInput(options);
+		var input = row.find("input");
+		input.attr("type", "checkbox");
+		input.attr("data-toggle", "toggle");
+		input.bootstrapToggle({"on":"Yes","off":"No"});
 		return row;
 	};
 

@@ -150,6 +150,8 @@ class Prop():
         if html_type is None:
             if data_type is str:
                 self.html_type = "text"
+            elif data_type is bool:
+                self.html_type = "checkbox"
             elif data_type is int:
                 self.html_type = "number"
             elif data_type is float:
@@ -258,12 +260,14 @@ class Image(_DBType):
     description = Prop("description", str)
     version = Prop("version", str)
     filename = Prop("filename", str)
+    signed = Prop("signed", bool, flags=Prop.flags.READ_ONLY) # TODO: not just yes/no but split yes into valid/invalid
 
     @classmethod
-    def new(cls, md5, description = None, version = None, filename = None):
+    def new(cls, md5, description = None, version = None, filename = None, signed = None):
         i = Image()
         i.md5 = md5
         i.description = description
         i.version = version
         i.filename = filename
+        i.signed = signed
         return i

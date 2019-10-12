@@ -1,3 +1,12 @@
+var Flags = {
+	REQUIRED: 1,
+	NO_SET: 2,
+	NO_EDIT: 4,
+	READ_ONLY: 6,
+	NEW_ONLY: 4,
+	EDIT_ONLY: 2
+};
+
 class API {
 	constructor() {
 		this.uri = "/api";
@@ -12,6 +21,8 @@ class API {
 		this.device = new ObjectEndPoint(this.uri + "/device", this.uri + "/devices");
 		this.category = new ObjectEndPoint(this.uri + "/category", this.uri + "/categories");
 		this.image = new ObjectEndPoint(this.uri + "/image", this.uri + "/images");
+
+		this.flags = Flags;
 	}
 }
 
