@@ -357,10 +357,10 @@ function imagesToMapping(images, includeNone) {
 	return images;
 }
 
-function emptyToUndef(data) {
+function emptyToNull(data) {
 	Object.keys(data).forEach(k=>{
 		if(data[k] == "") {
-			data[k] = undefined;
+			data[k] = null;
 		}
 	});
 	return data;
@@ -369,7 +369,7 @@ function emptyToUndef(data) {
 function generateAddCompleteHandler(type, idField) {
 	return function(dialog, form) {
 		var data = getFormData($(form));
-		data = emptyToUndef(data);
+		data = emptyToNull(data);
 		api[type].add(data).done(function() {
 			//TODO: fetch paginated part with new entry
 			refresh(type);
@@ -387,7 +387,7 @@ function generateAddCompleteHandler(type, idField) {
 function generateEditCompleteHandler(type, idField, idValue) {
 	return function(dialog, form) {
 		var data = getFormData($(form));
-		data = emptyToUndef(data);
+		data = emptyToNull(data);
 		api[type].put(idValue, data).done(function() {
 			//TODO: fetch paginated part with new entry
 			refresh(type);
