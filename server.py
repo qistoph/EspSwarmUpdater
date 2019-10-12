@@ -84,7 +84,7 @@ def close_connection(exception):
 
 if __name__ == "__main__":
     logging.basicConfig(level=config["loglevel"])
-    #TODO:MdnsAnnounce.register_service(port=config["port"], debug=False)
+    MdnsAnnounce.register_service(port=config["port"], debug=False)
 
     with app.app_context():
         swarmdb.init_db(app)
@@ -96,5 +96,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         pass
     finally:
-        #TODO:MdnsAnnounce.unregister_service()
-        pass
+        MdnsAnnounce.unregister_service()
