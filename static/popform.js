@@ -101,6 +101,7 @@
 		input.attr("required", options.required?"required":undefined);
 		input.attr("id", options.id);
 		input.attr("name", options.name);
+		input.attr("pattern", options.pattern);
 		return inputRow(options, input);
 	};//}}}
 

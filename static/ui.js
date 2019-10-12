@@ -2,10 +2,14 @@
 moment.locale('nl-NL');
 
 window.labels = {
+	"device": "Device",
+	"image": "Image",
+	"category": "Category",
 	"type": {
 		"device": {
 			"mac": "MAC",
 			"description": "Description",
+			"current_version": "Current version",
 			"first_seen": "First seen",
 			"last_seen": "Last seen",
 			"current_image": "Current image",
@@ -298,11 +302,8 @@ $(function() {
 	$(".editbtn").on("click", btnEdit_click);// TODO: remove when editbtns are removed from HTML
 	$(".addbtn").on("click", function(e) {
 		var type = $(e.delegateTarget).data("type");
-		if(type in add_prompts) {
-			add_prompts[type]();
-		} else {
-			bootbox.alert(`Cannot add ${type} yet`);
-		}
+
+		showEditPrompt(type);
 	});
 
 	refresh("device");
@@ -374,39 +375,38 @@ function generateAddCompleteHandler(type, nameField) {
 	};
 }
 
-//TODO: fetch paginated part with new entry
-var add_prompts = {
-	"category": function() {
-		// Skip images without filename (and thus binary)
-		var images = imagesToMapping(backend.images.filter((img)=>img.filename), true);
+function showEditPrompt(type, isnew, callback) {
+	// Skip images without filename (and thus binary)
+	// Allow 'None' selection
+	var images = imagesToMapping(backend.images.filter((img)=>img.filename), true);
 
-		var inputNr = 1;
-		var inputs = [];
-		api.types.find((t)=>t.name=="category").props.forEach(p => {
-			var opts = {
-				id: "cat_" + inputNr,
-				name: p.name,
-				label: labels.type["category"][p.name],
-				required: p.required
-			};
-
-			switch(p.input.type) {
-				case "text":
-					inputs.push(popform.TextInput(opts));
-					break;
-				case "ref_image":
-					inputs.push(popform.SelectInput(Object.assign(opts, {
-						options: images
-					})));
-			}
-			inputNr++;
+	var inputNr = 1;
+	var inputs = [];
+	api.types[type].props.forEach(p => {
+		var opts = Object.assign({}, p, {
+			id: "inp_" + inputNr,
+			label: labels.type[type][p.name],
 		});
-		console.log(inputs);
 
-		popform.show({
-			title: "New Category",
-			inputs: inputs,
-			completed: generateAddCompleteHandler("category", "name"),
-		});
-	},
-};
+		switch(p.input.type) {
+			case "text":
+				inputs.push(popform.TextInput(opts));
+				break;
+			case "ref_image":
+				inputs.push(popform.SelectInput(Object.assign(opts, {
+					options: images
+				})));
+			default:
+				console.error(`No popform type for ${p.input.type} in ${type}`);
+		}
+		inputNr++;
+	});
+
+	popform.show({
+		title: "New "+labels[type],
+		inputs: inputs,
+		completed: generateAddCompleteHandler(type, api.types[type].key),
+		//TODO: fetch paginated part with new entry
+	});
+}
+

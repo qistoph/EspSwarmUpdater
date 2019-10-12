@@ -27,7 +27,7 @@ def getProps(cls):
 
 @blueprint.route("/types")
 def types():
-    ret = []
+    ret = {}
     for typ in [DB.Device, DB.Category, DB.Image]:
         definition = []
         for prop in getProps(typ):
@@ -39,7 +39,7 @@ def types():
                 "flags": prop.flags,
                 "input": {"type": prop.html_type, "attrs": prop.html_attrs},
             })
-        ret.append({"name": typ.table, "props": definition})
+        ret[typ.table] = {"name": typ.table, "key": typ.key, "props": definition}
     return jsonify(ret)
 
 def paginate(count = None, max_limit = 20): # Factory
