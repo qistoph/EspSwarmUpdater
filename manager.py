@@ -12,7 +12,7 @@ def is_known_mac(mac):
 
 def get_desired_image(mac):
     device = DB.Device.get(mac)
-    if device and "desired_image" in device:
+    if device and "desired_image" in device and device["desired_image"] is not None:
         return {"md5": device["desired_image"], "source": "device"}
     else:
         if "category" in device:
