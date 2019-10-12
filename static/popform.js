@@ -103,7 +103,7 @@
 		input.attr("name", options.name);
 		input.attr("value", options.value);
 		input.attr("pattern", options.pattern);
-		if(options.disabled) {
+		if(options.readonly) {
 			input.attr("readonly", "readonly");
 		}
 		return inputRow(options, input);
@@ -121,7 +121,13 @@
 		var input = row.find("input");
 		input.attr("type", "checkbox");
 		input.attr("data-toggle", "toggle");
+		if(options.value) {
+			input.attr("checked","checked");
+		}
 		input.bootstrapToggle({"on":"Yes","off":"No"});
+		if(options.readonly) {
+			input.attr("disabled", "disabled");
+		}
 		return row;
 	};
 

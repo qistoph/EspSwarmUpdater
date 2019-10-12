@@ -428,7 +428,7 @@ function showEditPrompt(type, isnew, data) {
 			id: "inp_" + inputNr,
 			value: data?data[p.name]:undefined,
 			label: labels.type[type][p.name],
-			disabled: !isnew && (p.flags & api.flags.NO_EDIT)
+			readonly: !isnew && (p.flags & api.flags.NO_EDIT)
 		});
 
 		switch(p.input.type) {
