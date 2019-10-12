@@ -67,11 +67,11 @@ var tables = [
 		"title": "Images",
 		"columns": [
 			TableColumn("#"),
-			TableColumn(labels.type.category.name),
-			TableColumn(labels.type.category.md5),
-			TableColumn(labels.type.category.version),
-			TableColumn(labels.type.category.filename),
-			TableColumn(labels.type.category.signed),
+			TableColumn(labels.type.image.name),
+			TableColumn(labels.type.image.md5),
+			TableColumn(labels.type.image.version),
+			TableColumn(labels.type.image.filename),
+			TableColumn(labels.type.image.signed),
 			TableColumn(AddButton("category"), {"class":"text-right"}),
 		]
 	}
@@ -179,6 +179,7 @@ function addRow_device(data, idx) {
 			<td><a href="#" onClick="return hl_category('${data["category"]}')">${data["category"]||""}</a></td>
 		</tr>
 	`);
+	//TODO: unknown current_image should not be a link
 
 	if(data["desired_image"] && data["desired_image"]["md5"] != data["current_image"]) {
 		tr.addClass("bg-warning");
@@ -356,12 +357,19 @@ function imagesToMapping(images, includeNone) {
 	return images;
 }
 
+function emptyToUndef(data) {
+	Object.keys(data).forEach(k=>{
+		if(data[k] == "") {
+			data[k] = undefined;
+		}
+	});
+	return data;
+}
+
 function generateAddCompleteHandler(type, nameField) {
 	return function(dialog, form) {
 		var data = getFormData($(form));
-		if(data.desired_image === "") {
-			data.desired_image = undefined;
-		}
+		data = emptyToUndef(data);
 		api[type].add(data).done(function() {
 			refresh(type);
 		}).fail(
@@ -379,6 +387,10 @@ function showEditPrompt(type, isnew, callback) {
 	// Skip images without filename (and thus binary)
 	// Allow 'None' selection
 	var images = imagesToMapping(backend.images.filter((img)=>img.filename), true);
+	var categories = backend.categories.reduce(function(obj, cat) {
+		obj[cat.name] = cat.name;
+		return obj;
+	}, {"":"None"});
 
 	var inputNr = 1;
 	var inputs = [];
@@ -402,6 +414,12 @@ function showEditPrompt(type, isnew, callback) {
 				inputs.push(popform.SelectInput(Object.assign(opts, {
 					options: images
 				})));
+				break;
+			case "ref_category":
+				inputs.push(popform.SelectInput(Object.assign(opts, {
+					options: categories
+				})));
+				break;
 			default:
 				console.error(`No popform type for ${p.input.type} in ${type}`);
 		}

@@ -207,9 +207,9 @@ class Device(_DBType):
     first_seen = Prop("first_seen", float, html_type="datetime")
     last_seen = Prop("last_seen", float, html_type="datetime")
     current_version = Prop("current_version", str)
-    current_image = Prop("current_image", str, "^[0-9a-fA-F]{32}$")
-    desired_image = Prop("desired_image", str, "^[0-9a-fA-F]{32}$")
-    category = Prop("category", str, "^[a-zA-Z]\w+$")
+    current_image = Prop("current_image", str, "^[0-9a-fA-F]{32}$", html_type="ref_image")
+    desired_image = Prop("desired_image", str, "^[0-9a-fA-F]{32}$", html_type="ref_image")
+    category = Prop("category", str, "^[a-zA-Z]\w+$", html_type="ref_category")
 
     #TODO: automate this (in base/meta class)
     field_order = [
