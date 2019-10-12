@@ -105,6 +105,18 @@
 		return inputRow(options, input);
 	};//}}}
 
+	exports.NumberInput = function(options) {
+		var row = exports.TextInput(options);
+		var input = row.find("input");
+		input.attr("type", "number");
+		return row;
+	};
+
+	exports.DateTimeInput = function(options) {
+		//TODO: show calendar/clock
+		return exports.NumberInput(options);
+	};
+
 	exports.SelectInput = function(options) {
 		var select = $(templates.selectInput);
 		select.attr("required", options.required?"required":undefined);

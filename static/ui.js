@@ -392,6 +392,12 @@ function showEditPrompt(type, isnew, callback) {
 			case "text":
 				inputs.push(popform.TextInput(opts));
 				break;
+			case "number":
+				inputs.push(popform.NumberInput(opts));
+				break;
+			case "datetime":
+				inputs.push(popform.DateTimeInput(opts));
+				break;
 			case "ref_image":
 				inputs.push(popform.SelectInput(Object.assign(opts, {
 					options: images

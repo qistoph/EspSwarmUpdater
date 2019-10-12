@@ -204,8 +204,8 @@ class Device(_DBType):
 
     mac = Prop("mac", str, "^[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}$", Prop.flags.REQUIRED|Prop.flags.NEW_ONLY)
     description = Prop("description", str)
-    first_seen = Prop("first_seen", float)
-    last_seen = Prop("last_seen", float)
+    first_seen = Prop("first_seen", float, html_type="datetime")
+    last_seen = Prop("last_seen", float, html_type="datetime")
     current_version = Prop("current_version", str)
     current_image = Prop("current_image", str, "^[0-9a-fA-F]{32}$")
     desired_image = Prop("desired_image", str, "^[0-9a-fA-F]{32}$")
