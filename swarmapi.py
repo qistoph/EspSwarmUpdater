@@ -31,6 +31,7 @@ def types():
     for typ in [DB.Device, DB.Category, DB.Image]:
         definition = []
         for prop in getProps(typ):
+            print(dir(prop))
             definition.append({
                 "name": prop.name,
                 "pattern": prop.html_pattern,

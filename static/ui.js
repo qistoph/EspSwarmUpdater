@@ -1,6 +1,29 @@
 'use strict';
 moment.locale('nl-NL');
 
+var tables = [
+	{
+		"type": "category",
+		"title": "Categories",
+
+	}
+];
+
+// Data type plural/singluar mapping
+var plural = {
+	"device": "devices",
+	"category": "categories",
+	"image": "images",
+};
+var singular = {
+	"devices": "device",
+	"categories": "category",
+	"images": "image",
+};
+
+var backend_types = [];
+var backend = {}; // Ref to stored known backend values
+
 function highlight_scroll(targets) {
 	$("tr.bg-info").removeClass("bg-info")
 	targets.addClass("bg-info")
@@ -146,20 +169,6 @@ function btnEdit_click(e) {
 	});
 }
 
-// Data type plural/singluar mapping
-var plural = {
-	"device": "devices",
-	"category": "categories",
-	"image": "images",
-};
-var singular = {
-	"devices": "device",
-	"categories": "category",
-	"images": "image",
-};
-
-var backend = {}; // Ref to stored known backend values
-
 //TODO: pagination
 function refresh(type) {
 	api[type].list().done((data, paginate) => {
@@ -255,196 +264,48 @@ function generateAddCompleteHandler(type, nameField) {
 	};
 }
 
+window.labels = {
+	"type": {
+		"category": {
+			"name": "Name",
+			"desired_image": "Desired Image"
+		}
+	}
+};
+
 //TODO: fetch paginated part with new entry
 var add_prompts = {
 	"category": function() {
 		// Skip images without filename (and thus binary)
 		var images = imagesToMapping(backend.images.filter((img)=>img.filename), true);
 
+		var inputNr = 1;
+		var inputs = [];
+		api.types.find((t)=>t.name=="category").props.forEach(p => {
+			var opts = {
+				id: "cat_" + inputNr,
+				name: p.name,
+				label: labels.type["category"][p.name],
+				required: p.required
+			};
+
+			switch(p.input.type) {
+				case "text":
+					inputs.push(popform.TextInput(opts));
+					break;
+				case "ref_image":
+					inputs.push(popform.SelectInput(Object.assign(opts, {
+						options: images
+					})));
+			}
+			inputNr++;
+		});
+		console.log(inputs);
+
 		popform.show({
 			title: "New Category",
-			inputs: [
-				popform.TextInput({
-					id: "cat_name",
-					name: "name",
-					label: "Name",
-					required: true
-				}),
-				popform.SelectInput({
-					id: "cat_image",
-					name: "desired_image",
-					label: "Image",
-					required: false,
-					options: images,
-				})
-			],
+			inputs: inputs,
 			completed: generateAddCompleteHandler("category", "name"),
 		});
 	},
 };
-
-(function(root, factory){
-	'use strict';
-	root.popform = factory(root.jQuery);
-})(this, function init($, undefined) {
-	'use strict';
-
-	var exports = {};
-	var VERSION = '1.0.0';
-	exports.VERSION = VERSION;
-	
-	var templates = {
-		modal: `<div class="modal fade hide" id="modalCategory" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-
-      <!-- Modal Header -->
-      <div class="modal-header">
-        <h4 class="modal-title"></h4>
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-      </div>
-
-	  <form>
-		  <!-- Modal body -->
-		  <div class="modal-body">
-			  <div class="form-group row">
-				  <label class="col-4 col-form-label" for="cat_name">Name</label> 
-				  <div class="col-8">
-					  <div class="input-group">
-						  <div class="input-group-prepend">
-							  <div class="input-group-text">
-								  <i class="fa fa-tag"></i>
-							  </div>
-						  </div> 
-						  <input id="cat_name" name="cat_name" type="text" required="required" class="form-control">
-					  </div>
-				  </div>
-			  </div>
-			  <div class="form-group row">
-				  <label for="cat_desired_image" class="col-4 col-form-label">Desired Image</label> 
-				  <div class="col-8">
-					  <div class="input-group">
-						  <div class="input-group-prepend">
-							  <div class="input-group-text">
-								  <i class="fa fa-tag"></i>
-							  </div>
-						  </div> 
-						  <select id="cat_desired_image" name="cat_desired_image" class="custom-select" aria-describedby="cat_desired_imageHelpBlock">
-							  <option value="undefined">None</option>
-							  <option value="duck">Duck</option>
-							  <option value="fish">Fish</option>
-						  </select> 
-					  </div>
-					  <span id="cat_desired_imageHelpBlock" class="form-text text-muted">The firmware image devices in the category should download and install.</span>
-				  </div>
-			  </div> 
-		  </div>
-
-		  <!-- Modal footer // data-dismiss="modal" -->
-		  <div class="modal-footer">
-			  <button type="button" class="btn btn-secondary" id="formBtnCancel" data-dismiss="modal">Cancel</button>
-			  <button type="submit" class="btn btn-primary" id="formBtnDone">Create</button>
-		  </div>
-	  </form>
-
-    </div>
-  </div>
-</div>`,
-		formRow: '<div class="form-group row"></div>',
-		inputGroup: '<div class="col-8"><div class="input-group"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-tag"></i></div></div></div></div>',
-		label: '<label class="col-4 col-form-label"></label>',
-		textInput: '<input type="text" class="form-control">',
-		selectInput: '<select class="custom-select"></select>',
-	};
-
-	function isArray(a) {
-		return (!!a) && (a.constructor === Array);
-	};
-
-	function isObject(a) {
-		return (!!a) && (a.constructor === Object);
-	};
-
-	function inputLabel(options) {//{{{
-		var label = $(templates.label);
-		label.text(options.label);
-		label.attr("for", options.id);
-		label.attr("id", options.id+"_lbl");
-		return label;
-	}//}}}
-
-	function inputRow(options, input) {//{{{
-		var row = $(templates.formRow);
-		row.append(inputLabel(options));
-		row.append($(templates.inputGroup));
-		row.find(".input-group").append(input);
-		return row;
-	}//}}}
-
-	exports.TextInput = function(options) {//{{{
-		var input = $(templates.textInput);
-		input.attr("required", options.required?"required":undefined);
-		input.attr("id", options.id);
-		input.attr("name", options.name);
-		return inputRow(options, input);
-	};//}}}
-
-	exports.SelectInput = function(options) {
-		var select = $(templates.selectInput);
-		select.attr("required", options.required?"required":undefined);
-		select.attr("id", options.id);
-		select.attr("name", options.name);
-		for (let [value, label] of Object.entries(options.options)) {
-			select.append($("<option>").attr("value",value).text(label));
-		}
-		select.val(options.selected);
-		return inputRow(options, select);
-	};
-
-	exports.show = function(options) {
-		var dialog = $(templates.modal);
-
-		dialog.find(".modal-title").text(options.title);
-		var body = dialog.find(".modal-body");
-		body.html("");
-
-		options.inputs.forEach(function(input) {
-			body.append(input);
-		});
-
-		if(options.cancelText) {
-			dialog.find("#formBtnCancel").text(options.cancelText);
-		}
-		if(options.doneText) {
-			dialog.find("#formBtnDone").text(options.doneText);
-		}
-
-		var formCompleted = false;
-
-		dialog.find("form").on("submit", function() {
-			if(options.completed) {
-				var ret = options.completed(dialog, this);
-				if(ret !== false) {
-					formCompleted = true;
-					dialog.modal("hide");
-				}
-			}
-			return false; // Don't send the form
-		});
-
-		dialog.on("hidden.bs.modal", function() {
-			dialog.modal("dispose");
-			dialog.remove();
-		});
-
-		dialog.on("shown.bs.modal", function() {
-			dialog.find(":input")[1].focus()
-		});
-
-		$('body').append(dialog);
-		dialog.modal('show');
-		return dialog;
-	};
-
-	return exports;
-});

@@ -135,7 +135,7 @@ class Prop():
         self.__index = Prop.__indexCounter
         Prop.__indexCounter+=1
 
-        self.name = name
+        self.name = name # Field name in DB
         self.validator = validator
         self.flags = flags
 
@@ -241,7 +241,7 @@ class Category(_DBType):
     key = "name"
 
     name = Prop("name", str, "^[a-zA-Z]\w+$")
-    desired_image = Prop("desired_image", str, "^[0-9a-f]{32}$")
+    desired_image = Prop("desired_image", str, "^[0-9a-f]{32}$", html_type="ref_image")
 
     @classmethod
     def new(cls, name, desired_image = None):

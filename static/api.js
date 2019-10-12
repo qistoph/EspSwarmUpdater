@@ -2,6 +2,13 @@ class API {
 	constructor() {
 		this.uri = "/api";
 
+		var self = this;
+		JSON_get(this.uri + "/types", function(t) {
+			self.types = t;
+		}).fail(function() {
+			console.error("Could not load types:", arguments);
+		});
+
 		this.device = new ObjectEndPoint(this.uri + "/device", this.uri + "/devices");
 		this.category = new ObjectEndPoint(this.uri + "/category", this.uri + "/categories");
 		this.image = new ObjectEndPoint(this.uri + "/image", this.uri + "/images");
