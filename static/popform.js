@@ -41,7 +41,7 @@
 					  <div class="input-group">
 						  <div class="input-group-prepend">
 							  <div class="input-group-text">
-								  <i class="fa fa-tag"></i>
+								  <i class="fa fa-check-circle"></i>
 							  </div>
 						  </div> 
 						  <select id="cat_desired_image" name="cat_desired_image" class="custom-select" aria-describedby="cat_desired_imageHelpBlock">
@@ -70,6 +70,7 @@
 		label: '<label class="col-4 col-form-label"></label>',
 		textInput: '<input type="text" class="form-control">',
 		selectInput: '<select class="custom-select"></select>',
+		help: '<span id="cat_desired_imageHelpBlock" class="form-text text-muted">The firmware image devices in the category should download and install.</span>',
 	};
 
 	function isArray(a) {
@@ -93,6 +94,7 @@
 		row.append(inputLabel(options));
 		row.append($(templates.inputGroup));
 		row.find(".input-group").append(input);
+		//TODO:row.append($(templates.help));
 		return row;
 	}//}}}
 
