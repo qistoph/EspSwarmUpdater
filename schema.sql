@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS image (
 	md5 VARCHAR NOT NULL PRIMARY KEY,
 	description VARCHAR,
 	version VERCHAR,
-	filename VARCHAR
+	filename VARCHAR,
+	signed NUMERIC
 );
 
 COMMIT;

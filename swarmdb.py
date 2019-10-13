@@ -61,6 +61,7 @@ class _DBType(dict):
         query = f"SELECT * FROM {table_name} {where}"
         for row in query_db(query, where_vals):
             obj = cls.new(**row)
+            obj._indb = True # So we know to UPDATE instead of INSERT
             ret.append(obj)
         return ret
 
@@ -84,24 +85,32 @@ class _DBType(dict):
 
     def __init__(self, doc = {}):
         super().__init__(doc)
-        self.dbref = None
+        self._indb = False # Will be set after INSERT / SELECT
 
-    def save(self):
-        table_name = type(self).table
-
-        columns = []
-        values = []
+    def _get_props(self):
+        ret = {}
         for name in dir(self.__class__):
             attr = getattr(self.__class__, name)
             if isinstance(attr, Prop):
-                columns.append(attr.name)
-                values.append(getattr(self, name))
+                ret[attr.name] = getattr(self, name)
+        return ret
 
-        query = f'''
-        REPLACE INTO {table_name} ({", ".join(columns)})
-        VALUES (?{", ?"*(len(values)-1)})
-        '''
-        res = query_db(query, values)
+    def save(self):
+        table_name = type(self).table
+        key_name = type(self).key
+        props = self._get_props()
+
+        if not self._indb:
+            query = f'''
+            INSERT INTO {table_name} ({", ".join(props.keys())})
+            VALUES (?{", ?"*(len(props)-1)})
+            '''
+            res = query_db(query, list(props.values()))
+            self._indb = True
+        else:
+            query = f"UPDATE {table_name} SET " + (", ".join([f"{key} = ?" for key in props.keys()])) + \
+                    f" WHERE {key_name} = ?"
+            res = query_db(query, list(props.values())+[getattr(self, key_name)])
 
     def delete(self):
         table_name = type(self).table
