@@ -9,7 +9,6 @@ Manage update for your ESP8266 swarm with ease:
 To help prevent malicious firmware updates, I advise you to [sign your images](https://arduino-esp8266.readthedocs.io/en/latest/ota_updates/readme.html#advanced-security-signed-updates).
 
 ## TODO
-- Fix add/edit field icons
 - Add field explanation (see popform.templates.modal body)
 - Upload firmware from WebUI
 - Use MDNSServiceQueryCallback

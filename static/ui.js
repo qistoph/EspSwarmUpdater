@@ -31,6 +31,31 @@ window.labels = {
 	}
 };
 
+window.icons = {
+	"type": {
+		"device": {
+			"mac": "fa-ethernet",
+			"description": "fa-tag",
+			"first_seen": "fa-eye",
+			"last_seen": "fa-hourglass-half",
+			"current_version": "fa-barcode",
+			"current_image": "fa-hdd",
+			"desired_image": "fa-hdd",
+			"category": "fa-tag"
+		},
+		"category": {
+			"name": "fa-tag",
+			"desired_image": "fa-hdd"
+		},
+		"image": {
+			"md5": "fa-fingerprint",
+			"description": "fa-tag",
+			"version": "fa-barcode",
+			"filename": "fa-file-code"
+		}
+	}
+};
+
 var tables = [
 	{
 		"type": "device",
@@ -428,6 +453,7 @@ function showEditPrompt(type, isnew, data) {
 			id: "inp_" + inputNr,
 			value: data?data[p.name]:undefined,
 			label: labels.type[type][p.name],
+			icon: icons.type[type][p.name],
 			readonly: !isnew && (p.flags & api.flags.NO_EDIT)
 		});
 

@@ -66,7 +66,7 @@
   </div>
 </div>`,
 		formRow: '<div class="form-group row"></div>',
-		inputGroup: '<div class="col-8"><div class="input-group"><div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-tag"></i></div></div></div></div>',
+		inputGroup: '<div class="col-8"><div class="input-group"><div class="input-group-prepend"><div class="input-group-text"></div></div></div></div>',
 		label: '<label class="col-4 col-form-label"></label>',
 		textInput: '<input type="text" class="form-control">',
 		selectInput: '<select class="custom-select"></select>',
@@ -89,10 +89,17 @@
 		return label;
 	}//}}}
 
+	function faIcon(type) {
+		return $(`<i class="fa ${type}"></i>`);
+	}
+
 	function inputRow(options, input) {//{{{
 		var row = $(templates.formRow);
 		row.append(inputLabel(options));
 		row.append($(templates.inputGroup));
+		if(options.icon) {
+			row.find(".input-group-prepend .input-group-text").append(faIcon(options.icon));
+		}
 		row.find(".input-group").append(input);
 		//TODO:row.append($(templates.help));
 		return row;
