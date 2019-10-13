@@ -1,3 +1,5 @@
+'use strict';
+
 var Flags = {
 	REQUIRED: 1,
 	NO_SET: 2,
@@ -36,7 +38,7 @@ function JSON_get_paged(url, offset, limit, callback) {
 	}
 
 	function setPaginationHeaders(xhr) {
-		params = {'offset': offset, 'limit': limit};
+		var params = {'offset': offset, 'limit': limit};
 		xhr.setRequestHeader('X-Paginate', JSON.stringify(params));
 	}
 
@@ -48,8 +50,8 @@ function JSON_get_paged(url, offset, limit, callback) {
 		dataType: 'json',
 		beforeSend: setPaginationHeaders
 	}).done(function(data, textStatus, jqXHR) {
-		paginate = JSON.parse(jqXHR.getResponseHeader("X-Paginate"));
-		rem_args = Array.prototype.slice.call(arguments, 1);
+		var paginate = JSON.parse(jqXHR.getResponseHeader("X-Paginate"));
+		var rem_args = Array.prototype.slice.call(arguments, 1);
 		if(callback) {
 			callback(data, paginate, rem_args);
 		}
@@ -120,4 +122,5 @@ class ObjectEndPoint {
 	}
 }
 
-api = new API();
+var api = new API();
+window.api = api;
