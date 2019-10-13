@@ -256,10 +256,10 @@ class Image(_DBType):
     table = "image"
     key = "md5"
 
-    md5 = Prop("md5", str, "^[0-9a-f]{32}$")
+    md5 = Prop("md5", str, "^[0-9a-f]{32}$", flags=Prop.flags.READ_ONLY)
     description = Prop("description", str)
     version = Prop("version", str)
-    filename = Prop("filename", str)
+    filename = Prop("filename", str, flags=Prop.flags.READ_ONLY)
     signed = Prop("signed", bool, flags=Prop.flags.READ_ONLY) # TODO: not just yes/no but split yes into valid/invalid
 
     @classmethod

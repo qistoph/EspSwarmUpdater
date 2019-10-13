@@ -304,6 +304,7 @@ function btnAdd_click(e) {
 function btnEdit_click(e) {
 	var d = $(e.delegateTarget).data();
 	//TODO: show spinner while loading?
+	//TODO: get from backend-variable instead of through AJAX?
 	api[d.type].get(d.id).done((data) => {
 		showEditPrompt(d.type, false, data);
 	});
@@ -337,15 +338,6 @@ $(function() {
 	refresh("category");
 	refresh("image");
 });
-
-function add_failed_generator(type, name, input) {
-	return function() {
-		bootbox.alert({
-			title: $("<div>").text(`Add ${type} ${name} failed`).html(),
-			message: "An error occured while adding. Please try again."
-		});
-	};
-};
 
 function getFormData($form){
 	var unindexed_array = $form.serializeArray();
@@ -389,45 +381,6 @@ function emptyToNull(data) {
 		}
 	});
 	return data;
-}
-
-function generateAddCompleteHandler(type, idField) {
-	return function(dialog, form) {
-		var data = getFormData($(form));
-		data = emptyToNull(data);
-		api[type].add(data).done(function() {
-			//TODO: fetch paginated part with new entry
-			refresh(type);
-		}).fail(
-			add_failed_generator(type, data[idField], data)
-		).always(function() {
-			dialog.modal("hide");
-		});
-
-		$(form).find(":input").prop("disabled", true);
-		return false; // Don't close, we will after callback
-	};
-}
-
-function generateEditCompleteHandler(type, idField, idValue) {
-	return function(dialog, form) {
-		var data = getFormData($(form));
-		data = emptyToNull(data);
-		api[type].put(idValue, data).done(function() {
-			//TODO: fetch paginated part with new entry
-			refresh(type);
-		}).fail(function() {
-			bootbox.alert({
-				title: `Save ${type} ${data[idField]} failed`,
-				message: "An error occured while saving. Please try again."
-			});
-		}).always(function() {
-			dialog.modal("hide");
-		});
-
-		$(form).find(":input").prop("disabled", true);
-		return false; // Don't close, we will after callback
-	};
 }
 
 function showEditPrompt(type, isnew, data) {
@@ -487,18 +440,90 @@ function showEditPrompt(type, isnew, data) {
 	});
 
 	var keyname = api.types[type].key;
-	var handler;
+	var saveHandler;
 	if(isnew) {
-		handler = generateAddCompleteHandler(type, keyname);
+		saveHandler = function(id, data) {
+			return api[type].add(data);
+		}
 	} else {
-		handler = generateEditCompleteHandler(type, keyname, data[keyname]);
+		saveHandler = function(id, data) {
+			return api[type].put(id, data);
+		}
 	}
 
-	popform.show({
+	var opts = {
 		title: "New "+labels[type],
 		inputs: inputs,
 		doneText: isnew ? "Create" : "Save",
-		completed: handler,
+		getData: getFormData,
+		completed: function(dialog, form) {
+			var data = opts.getData($(form));
+			data = emptyToNull(data);
+			saveHandler(data[keyname], data).done(function() {
+				//TODO: fetch paginated part with new entry
+				refresh(type);
+			}).fail(function() {
+				bootbox.alert({
+					title: `Save ${type} ${data[keyname]} failed`,
+					message: "An error occured while saving. Please try again."
+				});
+			}).always(function() {
+				dialog.modal("hide");
+			});
+
+			$(form).find(":input").prop("disabled", true);
+			return false; // Don't close, we will after callback
+		},
+	};
+
+	if(customEditPrompt[type]) {
+		opts = customEditPrompt[type](opts, saveHandler);
+	}
+
+	popform.show(opts);
+}
+
+function getBase64(file) {
+	return new Promise(function(resolve, reject) {
+		var reader = new FileReader();
+		reader.onload = function () {
+			resolve(btoa(reader.result));
+		};
+		reader.onerror = function (error) {
+			console.error('Error: ', error);
+		};
+		reader.readAsBinaryString(file);
 	});
 }
 
+var customEditPrompt = {
+	"image": function(opts) {
+		var fileInput = popform.FileInput({
+			label: "File",
+			id: "file_1",
+			icon: "fa-file-code",
+			showProgress: true,
+			required: true,
+		});
+
+		opts.inputs.unshift(fileInput);
+
+		var fileName;
+		var fileData;
+		fileInput.fileSelected.then(function(input) {
+			fileName = input.files[0].name;
+			getBase64(input.files[0]).then(function(data) {
+				 fileData = data;
+			});
+		});
+
+		opts.getData = function($form) {
+			var data = getFormData($form);
+			data["filename"] = fileName;
+			data["binary"] = fileData;
+			return data;
+		};
+
+		return opts;
+	},
+};

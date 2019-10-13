@@ -157,6 +157,47 @@
 		return inputRow(options, select);
 	};
 
+	exports.FileInput = function(options) {
+		var row = exports.TextInput(options);
+
+		var input = row.find("input");
+		input.addClass("custom-file-input");
+		input.attr("type", "file");
+
+		var div = $('<div class="custom-file"></div>');
+		input.parent().append(div);
+		div.append(input);
+
+		var label = $(`<label class="custom-file-label" for="${options.id}">Choose file</label>`);
+		div.append(label);
+
+		if(options.showProgress) {
+			var progress = $(`<div class="progress-bar"></div>`);
+			row.children("div").append($(`<div class="progress"></div>`).append(progress));
+		}
+
+		row.progress = function(factor) {
+			progress.width((100*factor)+"%");
+			if(factor >= 100) {
+				progress.removeClass("progress-bar-striped progress-bar-animated");
+				progress.addClass("bg-success"); // TODO: green
+			} else {
+				progress.addClass("progress-bar-striped progress-bar-animated");
+			}
+		}
+
+		var fileSelectedPromise;
+		row.fileSelected = new Promise(function(resolve, reject) {
+			fileSelectedPromise = resolve;
+		});
+
+		input.on('change', function() {
+			label.text(this.files[0].name);
+			fileSelectedPromise(this);
+		});
+		return row;
+	};
+
 	exports.show = function(options) {
 		var dialog = $(templates.modal);
 

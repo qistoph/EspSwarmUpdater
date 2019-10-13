@@ -10,7 +10,10 @@ To help prevent malicious firmware updates, I advise you to [sign your images](h
 
 ## TODO
 - Add field explanation (see popform.templates.modal body)
-- Upload firmware from WebUI
+- Paginate tables (inspiration: https://www.datatables.net/)
+- Upload firmware from WebUI (WIP)
+- Split DB INSERT/UPDATE
+- Move UI definition (html\_\*-fields) from DB to `ui.js`
 - Use MDNSServiceQueryCallback
 - Implement HTTPS
 - Write build server example
