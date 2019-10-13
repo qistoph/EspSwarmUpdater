@@ -157,7 +157,7 @@ function hl_devices(category) {
 
 function object_buttons(type, id) {
 	var btnDelete = $(`<button class="btn btn-danger btn-sm deletebtn" data-type="${type}" data-id="${id}"><i class="fa fa-trash"></i></button>`);
-	var btnEdit = $(`<button class="btn btn-primary btn-sm editbtn" data-type="${type}" data-id="${id}"><i class="fa fa-pencil"></i></button>`);
+	var btnEdit = $(`<button class="btn btn-primary btn-sm editbtn" data-type="${type}" data-id="${id}"><i class="fa fa-edit"></i></button>`);
 
 	btnDelete.on("click", btnDelete_click);
 	btnEdit.on("click", btnEdit_click);
