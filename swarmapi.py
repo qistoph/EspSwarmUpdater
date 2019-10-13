@@ -128,6 +128,10 @@ class Image(Resource):
         obj = DB.Image.get(md5)
         if obj is None:
             return abort(404)
+
+        dest_filename = os.path.join("bin", secure_filename(data["filename"]))
+        if os.path.isfile(dest_filename):
+            os.remove(dest_filename)
         obj.delete()
 
 class DeviceList(Resource):
@@ -163,6 +167,7 @@ class ImageList(Resource):
         binary = b64decode(data["binary"])
         del data["binary"]
         data["md5"] = manager.get_image_md5(binary)
+        data["signed"] = manager.is_image_signed(binary)
 
         dest_filename = os.path.join("bin", secure_filename(data["filename"]))
         if os.path.isfile(dest_filename):

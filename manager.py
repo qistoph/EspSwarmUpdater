@@ -34,8 +34,12 @@ def update_device_seen(mac, version, md5):
         device.last_seen = time.time()
         device.save()
 
+def is_image_signed(blob):
+    # Signed update ends with bytes (hex): 00 01 00 00
+    return blob[-4:] == b'\x00\x01\x00\x00'
+
 def get_image_md5(blob):
-    if blob[-4:] == b'\x00\x01\x00\x00': # Signed update
+    if is_image_signed(blob):
         return _md5(blob[0:-0x104]).hexdigest()
     else:
         return _md5(blob).hexdigest()
