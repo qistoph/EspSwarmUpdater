@@ -75,14 +75,19 @@ function JSON_put(url, data, callback) {
 	});
 }
 
-function JSON_post(url, data, callback) {
+function JSON_post(url, data, callback, progress) {
 	return $.ajax({
 		url: url,
 		type: 'POST',
 		dataType: 'json',
 		contentType: 'application/json',
 		data: JSON.stringify(data),
-		success: callback
+		success: callback,
+		xhr: function() {
+			var xhr = $.ajaxSettings.xhr();
+			xhr.upload.onprogress = progress;
+			return xhr;
+		},
 	});
 }
 
@@ -117,8 +122,8 @@ class ObjectEndPoint {
 		return JSON_get_paged(this.list_uri, offset, limit, callback);
 	}
 
-	add(data, callback) {
-		return JSON_post(this.list_uri, data, callback);
+	add(data, callback, progress) {
+		return JSON_post(this.list_uri, data, callback, progress);
 	}
 }
 

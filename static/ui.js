@@ -443,7 +443,11 @@ function showEditPrompt(type, isnew, data) {
 	var saveHandler;
 	if(isnew) {
 		saveHandler = function(id, data) {
-			return api[type].add(data);
+			return api[type].add(data, undefined, function(prog) {
+				if(opts.progress) {
+					opts.progress(prog.loaded/prog.total);
+				}
+			});
 		}
 	} else {
 		saveHandler = function(id, data) {
@@ -463,6 +467,7 @@ function showEditPrompt(type, isnew, data) {
 				//TODO: fetch paginated part with new entry
 				refresh(type);
 			}).fail(function() {
+				console.error(arguments);
 				bootbox.alert({
 					title: `Save ${type} ${data[keyname]} failed`,
 					message: "An error occured while saving. Please try again."
@@ -507,6 +512,8 @@ var customEditPrompt = {
 		});
 
 		opts.inputs.unshift(fileInput);
+
+		opts.progress = fileInput.progress;
 
 		var fileName;
 		var fileData;
