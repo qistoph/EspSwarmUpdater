@@ -482,7 +482,7 @@ function showEditPrompt(type, isnew, data) {
 	};
 
 	if(customEditPrompt[type]) {
-		opts = customEditPrompt[type](opts, saveHandler);
+		opts = customEditPrompt[type](opts, isnew);
 	}
 
 	popform.show(opts);
@@ -502,34 +502,36 @@ function getBase64(file) {
 }
 
 var customEditPrompt = {
-	"image": function(opts) {
-		var fileInput = popform.FileInput({
-			label: "File",
-			id: "file_1",
-			icon: "fa-file-code",
-			showProgress: true,
-			required: true,
-		});
-
-		opts.inputs.unshift(fileInput);
-
-		opts.progress = fileInput.progress;
-
-		var fileName;
-		var fileData;
-		fileInput.fileSelected.then(function(input) {
-			fileName = input.files[0].name;
-			getBase64(input.files[0]).then(function(data) {
-				 fileData = data;
+	"image": function(opts, isnew) {
+		if(isnew) {
+			var fileInput = popform.FileInput({
+				label: "File",
+				id: "file_1",
+				icon: "fa-file-code",
+				showProgress: true,
+				required: true,
 			});
-		});
 
-		opts.getData = function($form) {
-			var data = getFormData($form);
-			data["filename"] = fileName;
-			data["binary"] = fileData;
-			return data;
-		};
+			opts.inputs.unshift(fileInput);
+
+			opts.progress = fileInput.progress;
+
+			var fileName;
+			var fileData;
+			fileInput.fileSelected.then(function(input) {
+				fileName = input.files[0].name;
+				getBase64(input.files[0]).then(function(data) {
+					 fileData = data;
+				});
+			});
+
+			opts.getData = function($form) {
+				var data = getFormData($form);
+				data["filename"] = fileName;
+				data["binary"] = fileData;
+				return data;
+			};
+		} // End if isnew
 
 		return opts;
 	},
