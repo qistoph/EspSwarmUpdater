@@ -134,7 +134,19 @@ function Table(opts) {
 	if(opts.note) {
 		foot.append($(`<tr><td colspan="100%">${opts.note}</td></tr>`));
 	}
-	foot.append(`<tr><td colspan="100%"><span class="cur-page">?</span> / <span class="total-pages">?</span></td></tr>`);
+	foot.append(`<tr><td colspan="100%">
+		Page: <span><select class="page-nr"></select></span>
+		Per page: <span><select class="per-page"></select></span>
+		Entries shown: <span class="cur-page">?</span> / <span class="total-pages">?</span>
+	</td></tr>`);
+
+	foot.find(".per-page").append(
+		[10,25,50,100].map((cnt) => $("<option>").attr("value", cnt).text(cnt))
+	);
+
+	foot.on("change", function() {
+		refresh(opts.type);
+	});
 
 	table.append(head);
 	table.append($("<tbody>"));
@@ -318,14 +330,26 @@ function btnEdit_click(e) {
 
 //TODO: pagination
 function refresh(type) {
-	api[type].list().done((data, paginate) => {
+	var table = $("#table-"+plural[type]);
+	var pageNr = parseInt(table.find(".page-nr").val())||0;
+	var perPage = parseInt(table.find(".per-page").val())||10;
+
+	var offset = pageNr * perPage;
+
+	api[type].list(offset, perPage).done((data, paginate) => {
 		backend[plural[type]] = data;
-		var table = $("#table-"+plural[type]);
 		var addFunc = window["addRow_"+type];
 		table.find("tbody tr").remove()
 		data.forEach((d, i) => addFunc(d, paginate.offset+i));
+		// TODO: rename cur-page and total-pages to *-records
 		table.find(".cur-page").text(`${paginate.offset+1}-${paginate.offset+data.length}`);
 		table.find(".total-pages").text(`${paginate.total}`);
+
+		var $selPages = table.find(".page-nr");
+		$selPages[0].innerHTML = "";
+		for(var i=0; i<paginate.total/perPage; ++i) {
+			$selPages.append($("<option>").attr("value", i).text(i+1).attr("selected", i==(offset/perPage)?"selected":undefined));
+		}
 	});
 }
 
@@ -446,6 +470,7 @@ function showEditPrompt(type, isnew, data) {
 	});
 
 	var keyname = api.types[type].key;
+	var oldId = data[keyname];
 	var saveHandler;
 	if(isnew) {
 		saveHandler = function(id, data) {
@@ -477,7 +502,7 @@ function showEditPrompt(type, isnew, data) {
 	dialog.on("submit", function(e) {
 		var data = opts.getData($(e.target));
 		data = emptyToNull(data);
-		saveHandler(data[keyname], data).done(function() {
+		saveHandler(oldId, data).done(function() {
 			//TODO: fetch paginated part with new entry
 			refresh(type);
 		}).fail(function() {

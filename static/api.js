@@ -57,7 +57,8 @@ function JSON_get_paged(url, offset, limit, callback) {
 		}
 		dfd.resolve(data, paginate, rem_args);
 	}).fail(function() {
-		args = Array.prototype.slice.call(arguments);
+		console.error(arguments);
+		var args = Array.prototype.slice.call(arguments);
 		dfd.reject(args);
 	});
 

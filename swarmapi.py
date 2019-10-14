@@ -44,7 +44,7 @@ def types():
         ret[typ.table] = {"name": typ.table, "key": typ.key, "props": definition}
     return jsonify(ret)
 
-def paginate(count = None, max_limit = 20): # Factory
+def paginate(count = None, max_limit = 100): # Factory
     def decorator(func):
         def wrapper(*args, **kwargs):
             # Default values
