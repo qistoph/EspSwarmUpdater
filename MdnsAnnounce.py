@@ -18,7 +18,7 @@ def addresses(ip_types = [AF_INET]):
                     ip_list.append(link['addr'])
     return ip_list
 
-def register_service(port, ssl=False, debug=False):
+def register_service(ip, port, ssl=False, debug=False):
     global zeroconf, info
 
     if debug:
@@ -34,7 +34,7 @@ def register_service(port, ssl=False, debug=False):
 
     #TODO: all_ips = addresses()
     #TODO: match against config["host"]
-    all_ips = ['192.168.178.108']
+    all_ips = [ip]
     logger.info(f"IPs: {all_ips}")
 
     info = ServiceInfo(

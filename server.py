@@ -24,6 +24,8 @@ config = {
     "locale": "en_US",
     "debug": True,
     "mdns": {
+        "ip": '192.168.178.108', # IP to use in mDNS announcements
+        #TODO: announce all local IP's after sketch is fixed to allow multiple IPs (Using MDNSServiceQueryCallback)
         "debug": False
     }
 }
@@ -84,7 +86,7 @@ def close_connection(exception):
 
 if __name__ == "__main__":
     logging.basicConfig(level=config["loglevel"])
-    MdnsAnnounce.register_service(port=config["port"], debug=False)
+    MdnsAnnounce.register_service(ip=config["mdns"]["ip"], port=config["port"], debug=config["mdns"]["debug"])
 
     with app.app_context():
         swarmdb.init_db(app)
