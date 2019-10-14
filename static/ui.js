@@ -26,7 +26,9 @@ window.labels = {
 			"md5": "MD5",
 			"version": "Version",
 			"filename": "Filename",
-			"signed": "Signed"
+			"signed": "Signed",
+			"added": "Added",
+			"last_seen": "Last seen",
 		}
 	}
 };
@@ -98,6 +100,8 @@ var tables = [
 			TableColumn(labels.type.image.version),
 			TableColumn(labels.type.image.filename),
 			TableColumn(labels.type.image.signed),
+			TableColumn(labels.type.image.added),
+			TableColumn(labels.type.image.last_seen),
 			TableColumn(AddButton("image"), {"class":"text-right"}),
 		]
 	}
@@ -239,6 +243,7 @@ function addRow_category(data, idx) {
 
 function addRow_image(data, idx) {
 	var key = data["md5"];
+	console.log(data);
 
 	var tr = $(`
 		<tr data-img-md5="${key}">
@@ -248,6 +253,8 @@ function addRow_image(data, idx) {
 			<td>${data["version"]||""}</td>
 			<td>${data["filename"]||""}</td>
 			<td>${data["signed"]?"Yes":"No"}</td>
+			<td>${data["added"]?moment.unix(data["added"]).format("lll"):""}</td>
+			<td title="${data["last_seen"]}">${data["last_seen"]?moment.unix(data["last_seen"]).fromNow():""}</td>
 		</tr>`);
 	//TODO: signed: yes/no => valid/invalid/no
 

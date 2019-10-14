@@ -23,7 +23,9 @@ CREATE TABLE IF NOT EXISTS image (
 	description VARCHAR,
 	version VERCHAR,
 	filename VARCHAR,
-	signed NUMERIC
+	signed NUMERIC,
+	added INTEGER,
+	last_seen INTEGER
 );
 
 COMMIT;

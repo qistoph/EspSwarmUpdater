@@ -20,4 +20,3 @@ To help prevent malicious firmware updates, I advise you to [sign your images](h
 - Show image description/version instead of hash in devices and categories list
 - Link image in categories list
 - Add type public key and allow public key uploads (to verify sigs)
-- Keep track of image datetime added and last seen

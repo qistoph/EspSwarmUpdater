@@ -23,7 +23,11 @@ def get_desired_image(mac):
 
 def update_device_seen(mac, version, md5):
     if DB.Image.count({"md5": md5}) == 0:
-        DB.Image.new(md5, version = version).save()
+        DB.Image.new(md5, version = version, last_seen=time.time()).save()
+    else:
+        img = DB.Image.get(md5)
+        img.last_seen = time.time()
+        img.save()
 
     device = DB.Device.get(mac)
     if device is None:

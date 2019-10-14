@@ -1,5 +1,6 @@
 import sys
 import json
+import time
 from flask import Blueprint, request, make_response, send_file, redirect, url_for, jsonify
 from flask_restful import Api, Resource, abort
 from io import BytesIO
@@ -168,6 +169,7 @@ class ImageList(Resource):
         del data["binary"]
         data["md5"] = manager.get_image_md5(binary)
         data["signed"] = manager.is_image_signed(binary)
+        data["added"] = time.time()
 
         dest_filename = os.path.join("bin", secure_filename(data["filename"]))
         if os.path.isfile(dest_filename):

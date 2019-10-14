@@ -270,13 +270,18 @@ class Image(_DBType):
     version = Prop("version", str)
     filename = Prop("filename", str, flags=Prop.flags.READ_ONLY)
     signed = Prop("signed", bool, flags=Prop.flags.READ_ONLY) # TODO: not just yes/no but split yes into valid/invalid
+    added = Prop("added", float, html_type="datetime", flags=Prop.flags.READ_ONLY)
+    last_seen = Prop("last_seen", float, html_type="datetime", flags=Prop.flags.READ_ONLY)
 
     @classmethod
-    def new(cls, md5, description = None, version = None, filename = None, signed = None):
+    def new(cls, md5, description = None, version = None, filename = None, signed = None, added = None, last_seen = None):
+        #TODO: maybe find a way to not have write out all props here
         i = Image()
         i.md5 = md5
         i.description = description
         i.version = version
         i.filename = filename
         i.signed = signed
+        i.added = added
+        i.last_seen = last_seen
         return i
