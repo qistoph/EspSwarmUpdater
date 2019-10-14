@@ -227,7 +227,7 @@ class PubKeyList(Resource):
         del data["keydata"]
 
         if not crypto.is_pubkey(data["data"]):
-            return abort(400)
+            return abort(400, message=f"Chosen file is not a valid publix key")
 
         DB.PubKey.new(**data).save()
         return redirect(url_for("api.pubkey", description=request.json["description"]))

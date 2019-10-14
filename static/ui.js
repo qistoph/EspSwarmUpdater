@@ -200,7 +200,6 @@ function TableColumn(label, opts) {
 
 	var th = $(`<th scopy="col"></th>`);
 	if(opts && opts.icon) {
-		console.log(opts);
 		th.append(`<i class="fa ${opts.icon}"></i> `);
 	}
 	if(typeof(label) == "string") {
@@ -559,11 +558,15 @@ function showEditPrompt(type, isnew, data) {
 		saveHandler(oldId, data).done(function() {
 			//TODO: fetch paginated part with new entry
 			refresh(type);
-		}).fail(function() {
-			console.error(arguments);
+		}).fail(function(xhr) {
+			var message = "An error occured while saving. Please try again.";
+			if(xhr.responseJSON.message) {
+				message = xhr.responseJSON.message;
+			}
+
 			bootbox.alert({
 				title: `Save ${type} ${data[keyname]} failed`,
-				message: "An error occured while saving. Please try again."
+				message: message
 			});
 		}).always(function() {
 			dialog.modal("hide");
