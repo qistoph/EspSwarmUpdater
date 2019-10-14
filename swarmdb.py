@@ -61,7 +61,7 @@ class _DBType(dict):
         query = f"SELECT * FROM {table_name} {where}"
         for row in query_db(query, where_vals):
             obj = cls.new(**row)
-            obj._indb = True # So we know to UPDATE instead of INSERT
+            obj._dbid = getattr(obj, cls.key) # So we know to UPDATE instead of INSERT
             ret.append(obj)
         return ret
 
@@ -85,7 +85,7 @@ class _DBType(dict):
 
     def __init__(self, doc = {}):
         super().__init__(doc)
-        self._indb = False # Will be set after INSERT / SELECT
+        self._dbid = None # Will be set after INSERT / SELECT
 
     def _get_props(self):
         ret = {}
@@ -100,17 +100,18 @@ class _DBType(dict):
         key_name = type(self).key
         props = self._get_props()
 
-        if not self._indb:
+        if self._dbid is None:
             query = f'''
             INSERT INTO {table_name} ({", ".join(props.keys())})
             VALUES (?{", ?"*(len(props)-1)})
             '''
             res = query_db(query, list(props.values()))
-            self._indb = True
+            self._dbid = getattr(self, key_name)
         else:
             query = f"UPDATE {table_name} SET " + (", ".join([f"{key} = ?" for key in props.keys()])) + \
                     f" WHERE {key_name} = ?"
-            res = query_db(query, list(props.values())+[getattr(self, key_name)])
+            res = query_db(query, list(props.values())+[self._dbid])
+            self._dbid = getattr(self, key_name)
 
     def delete(self):
         table_name = type(self).table
