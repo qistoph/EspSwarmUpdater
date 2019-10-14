@@ -243,7 +243,6 @@ function addRow_category(data, idx) {
 
 function addRow_image(data, idx) {
 	var key = data["md5"];
-	console.log(data);
 
 	var tr = $(`
 		<tr data-img-md5="${key}">
@@ -467,32 +466,38 @@ function showEditPrompt(type, isnew, data) {
 		inputs: inputs,
 		doneText: isnew ? "Create" : "Save",
 		getData: getFormData,
-		completed: function(dialog, form) {
-			var data = opts.getData($(form));
-			data = emptyToNull(data);
-			saveHandler(data[keyname], data).done(function() {
-				//TODO: fetch paginated part with new entry
-				refresh(type);
-			}).fail(function() {
-				console.error(arguments);
-				bootbox.alert({
-					title: `Save ${type} ${data[keyname]} failed`,
-					message: "An error occured while saving. Please try again."
-				});
-			}).always(function() {
-				dialog.modal("hide");
-			});
-
-			$(form).find(":input").prop("disabled", true);
-			return false; // Don't close, we will after callback
-		},
 	};
 
 	if(customEditPrompt[type]) {
 		opts = customEditPrompt[type](opts, isnew);
 	}
 
-	popform.show(opts);
+	var dialog = popform.create(opts);
+
+	dialog.on("submit", function(e) {
+		var data = opts.getData($(e.target));
+		data = emptyToNull(data);
+		saveHandler(data[keyname], data).done(function() {
+			//TODO: fetch paginated part with new entry
+			refresh(type);
+		}).fail(function() {
+			console.error(arguments);
+			bootbox.alert({
+				title: `Save ${type} ${data[keyname]} failed`,
+				message: "An error occured while saving. Please try again."
+			});
+		}).always(function() {
+			dialog.modal("hide");
+		});
+
+		$(e.target).find(":input").prop("disabled", true);
+		// Don't close, we will after callback
+		e.stopPropagation();
+		e.preventDefault();
+		return false;
+	});
+
+	dialog.modal("show");
 }
 
 function getBase64(file) {
@@ -520,7 +525,6 @@ var customEditPrompt = {
 			});
 
 			opts.inputs.unshift(fileInput);
-
 			opts.progress = fileInput.progress;
 
 			var fileName;

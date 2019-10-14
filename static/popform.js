@@ -198,7 +198,7 @@
 		return row;
 	};
 
-	exports.show = function(options) {
+	exports.create = function(options) {
 		var dialog = $(templates.modal);
 
 		dialog.find(".modal-title").text(options.title);
@@ -216,17 +216,8 @@
 			dialog.find("#formBtnDone").text(options.doneText);
 		}
 
-		var formCompleted = false;
-
-		dialog.find("form").on("submit", function() {
-			if(options.completed) {
-				var ret = options.completed(dialog, this);
-				if(ret !== false) {
-					formCompleted = true;
-					dialog.modal("hide");
-				}
-			}
-			return false; // Don't send the form
+		dialog.find("form").on("submit", function(e) {
+			e.preventDefault(); // Never send the form
 		});
 
 		dialog.on("hidden.bs.modal", function() {
@@ -239,8 +230,11 @@
 		});
 
 		$('body').append(dialog);
-		dialog.modal('show');
 		return dialog;
+	};
+
+	exports.show = function(options) {
+		exports.create(options).modal('show');
 	};
 
 	return exports;
