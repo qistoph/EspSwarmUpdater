@@ -470,7 +470,10 @@ function showEditPrompt(type, isnew, data) {
 	});
 
 	var keyname = api.types[type].key;
-	var oldId = data[keyname];
+	var oldId;
+	if(data) {
+		oldId = data[keyname];
+	}
 	var saveHandler;
 	if(isnew) {
 		saveHandler = function(id, data) {
