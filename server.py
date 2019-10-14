@@ -78,6 +78,14 @@ def check():
 
     return "", 304
 
+import sqlite3
+@app.errorhandler(sqlite3.OperationalError)
+@app.errorhandler(sqlite3.IntegrityError)
+def db_exception_handler(exception):
+    #print(">>>> Exception Happened <<<<")
+    logger.error("Exception:" + str(exception))
+    return 'Something wrong', 500
+
 @app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, '_database', None)
