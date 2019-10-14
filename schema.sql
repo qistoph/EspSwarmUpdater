@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS image (
 );
 
 CREATE TABLE IF NOT EXISTS pubkey (
-	description VARCHAR,
+	description VARCHAR NOT NULL PRIMARY KEY,
 	added INTEGER,
 	data TEXT
 );
