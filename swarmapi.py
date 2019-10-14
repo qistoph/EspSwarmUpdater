@@ -9,6 +9,7 @@ from hashlib import md5 as _md5
 
 import manager
 import swarmdb as DB
+import crypto
 
 if sys.version_info[0] != 3 or sys.version_info[1] < 6:
     print("This script requires Python version 3.6")
@@ -225,6 +226,10 @@ class PubKeyList(Resource):
         data["added"] = time.time()
         data["data"] = b64decode(data["keydata"])
         del data["keydata"]
+
+        if not crypto.is_pubkey(data["data"]):
+            return abort(400)
+
         DB.PubKey.new(**data).save()
         return redirect(url_for("api.pubkey", description=request.json["description"]))
 
