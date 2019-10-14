@@ -1,8 +1,10 @@
 from hashlib import md5 as _md5
 import time
+import struct
 from functools import reduce
 
 import swarmdb as DB
+import crypto
 
 #DB.load("swarmdb.json")
 #print(DB.data)
@@ -41,6 +43,13 @@ def update_device_seen(mac, version, md5):
 def is_image_signed(blob):
     # Signed update ends with bytes (hex): 00 01 00 00
     return blob[-4:] == b'\x00\x01\x00\x00'
+
+def verify_signature(signed_binary_data, pubkey_data):
+    (sig_len,) = struct.unpack("<I", signed_binary_data[-4:])
+    sig_start = len(signed_binary_data) - 4 - sig_len
+    signature = signed_binary_data[sig_start:-4]
+    binary = signed_binary_data[0:sig_start]
+    return crypto.verify(binary, signature, pubkey_data, False)
 
 def get_image_md5(blob):
     if is_image_signed(blob):

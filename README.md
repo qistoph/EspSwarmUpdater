@@ -17,7 +17,6 @@ To help prevent malicious firmware updates, I advise you to [sign your images](h
 - Use MDNSServiceQueryCallback
 - Implement HTTPS
 - Write build server example
-- Verify signed image signature when added (requires pub-keys)
+- Verify signed image signature when added (manager.verify\_signature)
 - Show image description/version instead of hash in devices and categories list
 - Link image in categories list
-- Add type public key and allow public key uploads (to verify sigs)
