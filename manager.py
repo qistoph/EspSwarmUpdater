@@ -14,14 +14,18 @@ def is_known_mac(mac):
 
 def get_desired_image(mac):
     device = DB.Device.get(mac)
-    if device and "desired_image" in device and device["desired_image"] is not None:
+    if not device:
+        raise ValueError(f"No device with MAC {mac}")
+        
+    print(device)
+    if device and device["desired_image"] is not None:
         return {"md5": device["desired_image"], "source": "device"}
-    else:
-        if "category" in device:
-            category = DB.Category.get(device["category"])
-            if category and "desired_image" in category:
-                return {"md5": category["desired_image"], "source": "category"}
-    raise ValueError(f"No device with MAC {mac}")
+    elif "category" in device:
+        category = DB.Category.get(device["category"])
+        if category and "desired_image" in category:
+            return {"md5": category["desired_image"], "source": "category"}
+
+    return {"md5": None, "source": "device"}
 
 def update_device_seen(mac, version, md5):
     if DB.Image.count({"md5": md5}) == 0:
