@@ -60,6 +60,7 @@ window.icons = {
 			"description": "fa-tag",
 			"version": "fa-barcode",
 			"filename": "fa-file-code",
+			"signed": "fa-file-signature",
 			"added": "fa-calendar",
 			"last_seen": "fa-hourglass-half",
 		},
@@ -78,14 +79,14 @@ var tables = [
 		"title": "Devices",
 		"columns": [
 			TableColumn("#"),
-			TableColumn(labels.type.device.mac),
-			TableColumn(labels.type.device.description),
-			TableColumn(labels.type.device.first_seen),
-			TableColumn(labels.type.device.last_seen),
-			TableColumn(labels.type.device.current_version),
-			TableColumn(labels.type.device.current_image),
-			TableColumn(labels.type.device.desired_image),
-			TableColumn(labels.type.device.category),
+			TableColumn(labels.type.device.mac, {"icon":icons.type.device.mac}),
+			TableColumn(labels.type.device.description, {"icon":icons.type.device.description}),
+			TableColumn(labels.type.device.first_seen, {"icon":icons.type.device.first_seen}),
+			TableColumn(labels.type.device.last_seen, {"icon":icons.type.device.last_seen}),
+			TableColumn(labels.type.device.current_version, {"icon":icons.type.device.current_version}),
+			TableColumn(labels.type.device.current_image, {"icon":icons.type.device.current_image}),
+			TableColumn(labels.type.device.desired_image, {"icon":icons.type.device.desired_image}),
+			TableColumn(labels.type.device.category, {"icon":icons.type.device.category}),
 			TableColumn(AddButton("device"), {"class":"text-right"}),
 		],
 		"note": "* desired image set on category"
@@ -96,9 +97,9 @@ var tables = [
 		"title": "Categories",
 		"columns": [
 			TableColumn("#"),
-			TableColumn(labels.type.category.name),
-			TableColumn(labels.type.category.desired_image),
-			TableColumn(labels.type.category.num_devices),
+			TableColumn(labels.type.category.name, {"icon":icons.type.category.name}),
+			TableColumn(labels.type.category.desired_image, {"icon":icons.type.category.desired_image}),
+			TableColumn(labels.type.category.num_devices, {"icon":icons.type.category.num_devices}),
 			TableColumn(AddButton("category"), {"class":"text-right"}),
 		]
 	},
@@ -108,13 +109,13 @@ var tables = [
 		"title": "Images",
 		"columns": [
 			TableColumn("#"),
-			TableColumn(labels.type.image.description),
-			TableColumn(labels.type.image.md5),
-			TableColumn(labels.type.image.version),
-			TableColumn(labels.type.image.filename),
-			TableColumn(labels.type.image.signed),
-			TableColumn(labels.type.image.added),
-			TableColumn(labels.type.image.last_seen),
+			TableColumn(labels.type.image.description, {"icon":icons.type.image.description}),
+			TableColumn(labels.type.image.md5, {"icon":icons.type.image.md5}),
+			TableColumn(labels.type.image.version, {"icon":icons.type.image.version}),
+			TableColumn(labels.type.image.filename, {"icon":icons.type.image.filename}),
+			TableColumn(labels.type.image.signed, {"icon":icons.type.image.signed}),
+			TableColumn(labels.type.image.added, {"icon":icons.type.image.added}),
+			TableColumn(labels.type.image.last_seen, {"icon":icons.type.image.last_seen}),
 			TableColumn(AddButton("image"), {"class":"text-right"}),
 		]
 	},
@@ -124,8 +125,8 @@ var tables = [
 		"title": "Public Keys",
 		"columns": [
 			TableColumn("#"),
-			TableColumn(labels.type.pubkey.description),
-			TableColumn(labels.type.pubkey.added),
+			TableColumn(labels.type.pubkey.description, {"icon":icons.type.pubkey.description}),
+			TableColumn(labels.type.pubkey.added, {"icon":icons.type.pubkey.added}),
 			TableColumn(AddButton("pubkey"), {"class":"text-right"}),
 		]
 	}
@@ -195,13 +196,18 @@ function Table(opts) {
 }
 
 function TableColumn(label, opts) {
+	opts = Object.assign({}, opts);
+
 	var th = $(`<th scopy="col"></th>`);
+	if(opts && opts.icon) {
+		console.log(opts);
+		th.append(`<i class="fa ${opts.icon}"></i> `);
+	}
 	if(typeof(label) == "string") {
-		th.text(label);
+		th.append(label);
 	} else {
 		th.append(label);
 	}
-	opts = Object.assign({}, opts);
 	if(opts.class) {
 		th.addClass(opts.class);
 	}
