@@ -95,6 +95,13 @@ def get_categories(offset = 0, limit = 10, search = {}):
         cat["num_devices"] = DB.Device.count({"category": cat["name"]})
     return cats
 
+def get_pubkeys(offset = 0, limit = 10, search = {}):
+    keys = search_paginated(DB.PubKey, offset, limit, search)
+    for key in keys:
+        del key["data"]
+    print(keys)
+    return keys
+
 if __name__ == '__main__':
     DB.Category.new("sensors").save()
     DB.Device.new("38:af:d7:a9:e2:1a", "localhost", time.time(), time.time(), None, None, "fa3722683f154dc281ff9c7d5a765830", "sensors").save()

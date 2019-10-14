@@ -286,3 +286,20 @@ class Image(_DBType):
         i.added = added
         i.last_seen = last_seen
         return i
+
+class PubKey(_DBType):
+    table = "pubkey"
+    key = "description"
+
+    description = Prop("description", "^\w+$", flags=Prop.flags.REQUIRED)
+    added = Prop("added", float, html_type="datetime", flags=Prop.flags.READ_ONLY)
+    data = Prop("data", str, flags=Prop.flags.READ_ONLY)
+
+    @classmethod
+    def new(cls, description, added = None, data = None):
+        p = PubKey()
+        p.description = description
+        p.added = added
+        p.data = data
+        return p
+

@@ -23,6 +23,7 @@ class API {
 		this.device = new ObjectEndPoint(this.uri + "/device", this.uri + "/devices");
 		this.category = new ObjectEndPoint(this.uri + "/category", this.uri + "/categories");
 		this.image = new ObjectEndPoint(this.uri + "/image", this.uri + "/images");
+		this.pubkey = new ObjectEndPoint(this.uri + "/pubkey", this.uri + "/pubkeys");
 
 		this.flags = Flags;
 	}

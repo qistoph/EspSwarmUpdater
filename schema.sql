@@ -28,4 +28,10 @@ CREATE TABLE IF NOT EXISTS image (
 	last_seen INTEGER
 );
 
+CREATE TABLE IF NOT EXISTS pubkey (
+	description VARCHAR,
+	added INTEGER,
+	data TEXT
+);
+
 COMMIT;

@@ -29,8 +29,9 @@ def getProps(cls):
 
 @blueprint.route("/types")
 def types():
+    import inspect
     ret = {}
-    for typ in [DB.Device, DB.Category, DB.Image]:
+    for typ in [m[1] for m in inspect.getmembers(DB, inspect.isclass) if issubclass(m[1], DB._DBType) and not m[1] == DB._DBType]:
         definition = []
         for prop in getProps(typ):
             #print(dir(prop))
@@ -135,6 +136,23 @@ class Image(Resource):
             os.remove(dest_filename)
         obj.delete()
 
+class PubKey(Resource):
+    def get(self, description):
+        key = DB.PubKey.get(description)
+        del key["data"]
+        return key
+
+    def put(self, description):
+        p = DB.PubKey.get(description)
+        p.update(**request.json)
+        p.save()
+        new_desc = request.json["description"]
+        return self.get(new_desc)
+
+    def delete(self, description):
+        p = DB.PubKey.get(description)
+        p.delete()
+
 class DeviceList(Resource):
     def count(self):
         return DB.Device.count()
@@ -194,6 +212,22 @@ class CategoryList(Resource):
         DB.Category.new(**request.json).save()
         return redirect(url_for("api.category", name=request.json["name"]))
 
+class PubKeyList(Resource):
+    def count(self):
+        return DB.PubKey.count()
+
+    @paginate(count)
+    def get(self, offset, limit):
+        return manager.get_pubkeys(offset, limit, request.args.to_dict())
+
+    def post(self):
+        data = request.json
+        data["added"] = time.time()
+        data["data"] = b64decode(data["keydata"])
+        del data["keydata"]
+        DB.PubKey.new(**data).save()
+        return redirect(url_for("api.pubkey", description=request.json["description"]))
+
 class ImageBinary(Resource):
     def get(self, md5):
         (file_version, file_name, file_md5, file_data) = manager.get_image_data(md5)
@@ -208,6 +242,8 @@ api.add_resource(Device, '/device/<string:mac>')
 api.add_resource(Image, '/image/<string:md5>')
 api.add_resource(ImageBinary, '/image/<string:md5>/binary')
 api.add_resource(Category, '/category/<string:name>')
+api.add_resource(PubKey, '/pubkey/<string:description>')
 api.add_resource(DeviceList, '/devices')
 api.add_resource(ImageList, '/images')
 api.add_resource(CategoryList, '/categories')
+api.add_resource(PubKeyList, '/pubkeys')

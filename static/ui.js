@@ -5,6 +5,7 @@ window.labels = {
 	"device": "Device",
 	"image": "Image",
 	"category": "Category",
+	"pubkey": "Public Key",
 	"type": {
 		"device": {
 			"mac": "MAC",
@@ -29,7 +30,12 @@ window.labels = {
 			"signed": "Signed",
 			"added": "Added",
 			"last_seen": "Last seen",
-		}
+		},
+		"pubkey": {
+			"description": "Description",
+			"added": "Added",
+			"data": "Data"
+		},
 	}
 };
 
@@ -53,8 +59,15 @@ window.icons = {
 			"md5": "fa-fingerprint",
 			"description": "fa-tag",
 			"version": "fa-barcode",
-			"filename": "fa-file-code"
-		}
+			"filename": "fa-file-code",
+			"added": "fa-calendar",
+			"last_seen": "fa-hourglass-half",
+		},
+		"pubkey": {
+			"description": "fa-tag",
+			"added": "fa-calendar",
+			"data": "fa-key"
+		},
 	}
 };
 
@@ -104,6 +117,17 @@ var tables = [
 			TableColumn(labels.type.image.last_seen),
 			TableColumn(AddButton("image"), {"class":"text-right"}),
 		]
+	},
+	{
+		"type": "pubkey",
+		"id": "table-pubkeys",
+		"title": "Public Keys",
+		"columns": [
+			TableColumn("#"),
+			TableColumn(labels.type.pubkey.description),
+			TableColumn(labels.type.pubkey.added),
+			TableColumn(AddButton("pubkey"), {"class":"text-right"}),
+		]
 	}
 ];
 
@@ -112,11 +136,13 @@ var plural = {
 	"device": "devices",
 	"category": "categories",
 	"image": "images",
+	"pubkey": "pubkeys",
 };
 var singular = {
 	"devices": "device",
 	"categories": "category",
 	"images": "image",
+	"pubkeys": "pubkey",
 };
 
 var backend_types = [];
@@ -276,6 +302,23 @@ function addRow_image(data, idx) {
 	$("#table-images tbody").append(tr);
 }
 
+function addRow_pubkey(data, idx) {
+	var key = data["description"];
+
+	var tr = $(`
+		<tr data-pubkey-name="${key}">
+			<th scope="row">${idx+1}</th>
+			<td>${data["description"]}</td>
+			<td>${data["added"]?moment.unix(data["added"]).format("lll"):""}</td>
+		</tr>`);
+
+	var buttonsTd = $('<td class="text-right" style="white-space: nowrap"></td>');
+	buttonsTd.append(object_buttons('pubkey', key));
+	tr.append(buttonsTd);
+
+	$("#table-pubkeys tbody").append(tr);
+}
+
 function btnDelete_click(e){
 	var type = $(e.delegateTarget).data("type");
 	var id = $(e.delegateTarget).data("id");
@@ -338,9 +381,8 @@ function refresh(type) {
 
 	api[type].list(offset, perPage).done((data, paginate) => {
 		backend[plural[type]] = data;
-		var addFunc = window["addRow_"+type];
 		table.find("tbody tr").remove()
-		data.forEach((d, i) => addFunc(d, paginate.offset+i));
+		data.forEach((d, i) => window["addRow_"+type](d, paginate.offset+i));
 		// TODO: rename cur-page and total-pages to *-records
 		table.find(".cur-page").text(`${paginate.offset+1}-${paginate.offset+data.length}`);
 		table.find(".total-pages").text(`${paginate.total}`);
@@ -367,6 +409,7 @@ $(function() {
 	refresh("device");
 	refresh("category");
 	refresh("image");
+	refresh("pubkey");
 });
 
 function getFormData($form){
@@ -574,4 +617,35 @@ var customEditPrompt = {
 
 		return opts;
 	},
+	"pubkey": function(opts, isnew) {
+		if(isnew) {
+			var fileInput = popform.FileInput({
+				label: "File",
+				id: "file_1",
+				icon: "fa-key",
+				showProgress: true,
+				required: true,
+			});
+
+			opts.inputs.unshift(fileInput);
+			opts.progress = fileInput.progress;
+
+			var fileName;
+			var fileData;
+			fileInput.fileSelected.then(function(input) {
+				fileName = input.files[0].name;
+				getBase64(input.files[0]).then(function(data) {
+					 fileData = data;
+				});
+			});
+
+			opts.getData = function($form) {
+				var data = getFormData($form);
+				data["keydata"] = fileData;
+				return data;
+			};
+		}
+
+		return opts;
+	}
 };
