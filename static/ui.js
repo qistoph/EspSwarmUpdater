@@ -1,5 +1,5 @@
 'use strict';
-moment.locale('nl-NL');
+moment.locale('nl-NL'); //TODO: move to application config
 
 window.labels = {
 	"device": "Device",
@@ -261,7 +261,7 @@ function addRow_device(data, idx) {
 			<td>${data["mac"]}</td>
 			<td>${data["description"]||""}</td>
 			<td>${data["first_seen"]?moment.unix(data["first_seen"]).format("lll"):""}</td>
-			<td title="${data["last_seen"]}">${data["last_seen"]?moment.unix(data["last_seen"]).fromNow():""}</td>
+			<td title="${data["last_seen"]?moment.unix(data["last_seen"]).format("lll"):""}">${data["last_seen"]?moment.unix(data["last_seen"]).fromNow():""}</td>
 			<td>${data["current_version"]||""}</td>
 			<td><a href="#" onClick="return hl_image('${data["current_image"]}')">${data["current_image"]||"unknown"}</a></td>
 			<td><a href="#" onClick="return hl_image('${data["desired_image"]["md5"]}')">${data["desired_image"]["md5"]||""}</a>${(data["desired_image"]["source"] != "device")?"*":""}</td>
@@ -311,7 +311,7 @@ function addRow_image(data, idx) {
 			<td>${data["filename"]||""}</td>
 			<td>${data["signed"]?"Yes":"No"}</td>
 			<td>${data["added"]?moment.unix(data["added"]).format("lll"):""}</td>
-			<td title="${data["last_seen"]}">${data["last_seen"]?moment.unix(data["last_seen"]).fromNow():""}</td>
+			<td title="${data["last_seen"]?moment.unix(data["last_seen"]).format("lll"):""}">${data["last_seen"]?moment.unix(data["last_seen"]).fromNow():""}</td>
 		</tr>`);
 	//TODO: signed: yes/no => valid/invalid/no
 
