@@ -6,6 +6,8 @@ from flask_restful import Api, Resource, abort
 from io import BytesIO
 from base64 import b64decode
 from hashlib import md5 as _md5
+from werkzeug.utils import secure_filename
+import os.path
 
 import manager
 import swarmdb as DB
@@ -132,7 +134,7 @@ class Image(Resource):
         if obj is None:
             return abort(404)
 
-        dest_filename = os.path.join("bin", secure_filename(data["filename"]))
+        dest_filename = os.path.join("bin", secure_filename(obj["filename"]))
         if os.path.isfile(dest_filename):
             os.remove(dest_filename)
         obj.delete()
@@ -178,9 +180,6 @@ class ImageList(Resource):
         return manager.get_images(offset, limit, request.args.to_dict())
 
     def post(self):
-        from werkzeug.utils import secure_filename
-        import os.path
-
         #TODO input sanitation
 
         data = request.json

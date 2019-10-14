@@ -20,3 +20,4 @@ To help prevent malicious firmware updates, I advise you to [sign your images](h
 - Verify signed image signature when added (manager.verify\_signature)
 - Show image description/version instead of hash in devices and categories list
 - Link image in categories list
+- Proper error messages to client on save/delete
