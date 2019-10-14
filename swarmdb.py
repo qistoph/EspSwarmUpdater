@@ -19,7 +19,7 @@ def init_db(app):
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
+        db = g._database = sqlite3.connect(DATABASE, timeout=5)
     return db
 
 def query_db(query, args=(), one=False):
@@ -251,7 +251,7 @@ class Category(_DBType):
     table = "category"
     key = "name"
 
-    name = Prop("name", str, "^[a-zA-Z]\w+$")
+    name = Prop("name", str, "^[a-zA-Z]\w+$", flags=Prop.flags.REQUIRED)
     desired_image = Prop("desired_image", str, "^[0-9a-f]{32}$", html_type="ref_image")
 
     @classmethod
