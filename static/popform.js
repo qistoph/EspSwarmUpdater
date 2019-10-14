@@ -141,8 +141,31 @@
 	};
 
 	exports.DateTimeInput = function(options) {
-		//TODO: show calendar/clock
-		return exports.NumberInput(options);
+		var row = exports.TextInput(options);
+		var inputgrp= row.find(".input-group");
+		inputgrp.attr("id", "dp_"+options.id);
+		inputgrp.addClass("date");
+		inputgrp.data("target-input","nearest");
+		var input = row.find("input");
+		input.removeAttr("value");
+		input.data("target", "#dp"+options.id);
+		inputgrp.append($(`<div class="input-group-append" data-target="#dp_${options.id}" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                    </div>`));
+		
+		var dtOpts = {
+			useCurrent: true, // Doesn't do anything?
+			keepOpen: false, // Doesn't do anything?
+			// TODO: support locale? (e.g. {"locale":"nl"})
+		};
+
+		var mom = moment.unix(options.value);
+		if(options.value && mom.isValid()) {
+			dtOpts["defaultDate"] = mom;
+		}
+
+		$(inputgrp).datetimepicker(dtOpts);
+		return row;
 	};
 
 	exports.SelectInput = function(options) {
@@ -228,6 +251,28 @@
 		dialog.on("shown.bs.modal", function() {
 			dialog.find(":input")[1].focus()
 		});
+
+		dialog.getData = function() {
+			var $form = $(dialog.find("form")[0]);
+			var unindexed_array = $form.serializeArray();
+			var indexed_array = {};
+
+			$.map(unindexed_array, function(n, i){
+				var $input = $(`input[name=${n['name']}]`);
+				// Special for datetimepicker:
+				if($input.closest("div.input-group").hasClass("date")) {
+					indexed_array[n['name']] = $input.datetimepicker("viewDate").unix();
+				} else {
+					indexed_array[n['name']] = n['value'];
+				}
+			});
+
+			if(options.getData) {
+				indexed_array = options.getData(indexed_array);
+			}
+
+			return indexed_array;
+		};
 
 		$('body').append(dialog);
 		return dialog;

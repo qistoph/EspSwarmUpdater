@@ -145,6 +145,20 @@ var singular = {
 	"pubkeys": "pubkey",
 };
 
+$.fn.datetimepicker.Constructor.Default = $.extend({}, $.fn.datetimepicker.Constructor.Default, {
+	icons: {
+		time: 'fa fa-clock',
+		date: 'fa fa-calendar',
+		up: 'fa fa-arrow-up',
+		down: 'fa fa-arrow-down',
+		previous: 'fa fa-chevron-left',
+		next: 'fa fa-chevron-right',
+		today: 'fa fa-calendar-check-o',
+		clear: 'fa fa-trash',
+		close: 'fa fa-times'
+	}
+});
+
 var backend_types = [];
 var backend = {}; // Ref to stored known backend values
 
@@ -412,17 +426,6 @@ $(function() {
 	refresh("pubkey");
 });
 
-function getFormData($form){
-	var unindexed_array = $form.serializeArray();
-	var indexed_array = {};
-
-	$.map(unindexed_array, function(n, i){
-		indexed_array[n['name']] = n['value'];
-	});
-
-	return indexed_array;
-}
-
 function imagesToMapping(images, includeNone) {
 	var base = {};
 	if(includeNone) {
@@ -536,7 +539,6 @@ function showEditPrompt(type, isnew, data) {
 		title: "New "+labels[type],
 		inputs: inputs,
 		doneText: isnew ? "Create" : "Save",
-		getData: getFormData,
 	};
 
 	if(customEditPrompt[type]) {
@@ -546,7 +548,7 @@ function showEditPrompt(type, isnew, data) {
 	var dialog = popform.create(opts);
 
 	dialog.on("submit", function(e) {
-		var data = opts.getData($(e.target));
+		var data = dialog.getData();
 		data = emptyToNull(data);
 		saveHandler(oldId, data).done(function() {
 			//TODO: fetch paginated part with new entry
@@ -607,8 +609,7 @@ var customEditPrompt = {
 				});
 			});
 
-			opts.getData = function($form) {
-				var data = getFormData($form);
+			opts.getData = function(data) {
 				data["filename"] = fileName;
 				data["binary"] = fileData;
 				return data;
@@ -639,8 +640,7 @@ var customEditPrompt = {
 				});
 			});
 
-			opts.getData = function($form) {
-				var data = getFormData($form);
+			opts.getData = function(data) {
 				data["keydata"] = fileData;
 				return data;
 			};
