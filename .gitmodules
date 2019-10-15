@@ -1,0 +1,3 @@
+[submodule "static/libs/bootstrap4-toggle"]
+	path = static/libs/bootstrap4-toggle
+	url = https://github.com/gitbrent/bootstrap4-toggle.git
