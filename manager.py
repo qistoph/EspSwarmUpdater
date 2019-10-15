@@ -17,7 +17,6 @@ def get_desired_image(mac):
     if not device:
         raise ValueError(f"No device with MAC {mac}")
         
-    print(device)
     if device and device["desired_image"] is not None:
         return {"md5": device["desired_image"], "source": "device"}
     elif "category" in device:
@@ -75,18 +74,18 @@ def get_image_data(md5):
     assert md5 == md5sum, f"{md5} == {md5sum}"
     return version, filename, md5sum, data
 
-def search_paginated(cls, offset, limit, search):
+def search_paginated(cls, offset, limit, orderby, search):
     if len(search) <= 0:
-        return cls.search()[offset:offset+limit]
+        return cls.search(order_fields=orderby)[offset:offset+limit]
     else:
-        return cls.search(search)[offset:offset+limit]
+        return cls.search(matcher=search, order_fields=orderby)[offset:offset+limit]
 
 def update_device(mac, data):
     ans = table_devices.update(data, where("mac") == mac)
     return ans
 
-def get_devices(offset = 0, limit = 10, search = {}):
-    devs = search_paginated(DB.Device, offset, limit, search)
+def get_devices(offset = 0, limit = 10, orderby = [], search = {}):
+    devs = search_paginated(DB.Device, offset, limit, orderby, search)
     for dev in devs:
         dev["desired_image"] = get_desired_image(dev["mac"])
     return devs
@@ -95,24 +94,23 @@ def update_image(md5, data):
     ans = table_images.update(data, where("md5") == md5)
     return ans
 
-def get_images(offset = 0, limit = 10, search = {}):
-    return search_paginated(DB.Image, offset, limit, search)
+def get_images(offset = 0, limit = 10, orderby = [], search = {}):
+    return search_paginated(DB.Image, offset, limit, orderby, search)
 
 def update_category(name, data):
     ans = table_categories.update(data, where("name") == name)
     return ans
 
-def get_categories(offset = 0, limit = 10, search = {}):
-    cats = search_paginated(DB.Category, offset, limit, search)
+def get_categories(offset = 0, limit = 10, orderby = [], search = {}):
+    cats = search_paginated(DB.Category, offset, limit, orderby, search)
     for cat in cats:
         cat["num_devices"] = DB.Device.count({"category": cat["name"]})
     return cats
 
-def get_pubkeys(offset = 0, limit = 10, search = {}):
-    keys = search_paginated(DB.PubKey, offset, limit, search)
+def get_pubkeys(offset = 0, limit = 10, orderby = [], search = {}):
+    keys = search_paginated(DB.PubKey, offset, limit, orderby, search)
     for key in keys:
         del key["data"]
-    print(keys)
     return keys
 
 if __name__ == '__main__':

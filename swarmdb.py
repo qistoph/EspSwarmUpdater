@@ -42,7 +42,7 @@ def dict_factory(cursor, row):
 
 class _DBType(dict):
     @classmethod
-    def search(cls, matcher = None):
+    def search(cls, matcher = None, order_fields = []):
         table_name = cls.table
         ret = []
 
@@ -58,7 +58,14 @@ class _DBType(dict):
             if where != "":
                 where = "WHERE "+where
 
-        query = f"SELECT * FROM {table_name} {where}"
+        orderby = ""
+        if len(order_fields) > 0:
+            #TODO: check {name} is in Props
+            orderby = "ORDER BY " + ", ".join([
+                f"{name} {direction}" for (name, direction) in order_fields
+            ])
+
+        query = f"SELECT * FROM {table_name} {where} {orderby}"
         for row in query_db(query, where_vals):
             obj = cls.new(**row)
             obj._dbid = getattr(obj, cls.key) # So we know to UPDATE instead of INSERT

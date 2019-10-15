@@ -33,14 +33,17 @@ function JSON_get(url, callback) {
 	return $.getJSON(url, callback);
 }
 
-function JSON_get_paged(url, offset, limit, callback) {
-	if(arguments.length < 3) {
-		throw Error("JSON_get_paged has 3 required arguments: url, offset, limit");
+function JSON_get_paged(url, offset, limit, orderby, callback) {
+	if(arguments.length < 4) {
+		throw Error("JSON_get_paged has 4 required arguments: url, offset, limit, orderby");
 	}
+
+	orderby = orderby || null;
 
 	function setPaginationHeaders(xhr) {
 		var params = {'offset': offset, 'limit': limit};
 		xhr.setRequestHeader('X-Paginate', JSON.stringify(params));
+		xhr.setRequestHeader('X-Order', JSON.stringify(orderby));
 	}
 
 	var dfd = new $.Deferred();
@@ -120,8 +123,8 @@ class ObjectEndPoint {
 		return JSON_delete(this.uri + "/" + id, callback);
 	}
 
-	list(offset, limit, callback) {
-		return JSON_get_paged(this.list_uri, offset, limit, callback);
+	list(offset, limit, orderby, callback) {
+		return JSON_get_paged(this.list_uri, offset, limit, orderby, callback);
 	}
 
 	add(data, callback, progress) {

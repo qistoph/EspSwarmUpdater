@@ -8,6 +8,7 @@ from base64 import b64decode
 from hashlib import md5 as _md5
 from werkzeug.utils import secure_filename
 import os.path
+import logging
 
 import manager
 import swarmdb as DB
@@ -48,7 +49,36 @@ def types():
         ret[typ.table] = {"name": typ.table, "key": typ.key, "props": definition}
     return jsonify(ret)
 
-def paginate(count = None, max_limit = 100): # Factory
+def sorted(): # Factory
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            kwargs['orderby'] = []
+            if 'X-Order' in request.headers:
+                kwargs['orderby'] = []
+                p = json.loads(request.headers.get('X-Order')) or []
+                for field in p:
+                    #TODO: input validation
+                    if ":" in field:
+                        (field, direction) = field.split(":")
+                    else:
+                        direction = "asc"
+                    if direction not in ["asc", "desc"]:
+                        raise ValueError(f"Sort order must be 'asc' or 'desc' '{p}'")
+                    kwargs['orderby'].append((field,direction))
+            ans = func(*args, **kwargs)
+
+            if type(ans) is tuple:
+                (ans,code,headers) = ans
+            else:
+                headers = {}
+
+            headers['X-Order'] = json.dumps([f"{name}:{dire}" for (name, dire) in kwargs['orderby'] ])
+
+            return (ans,None,headers)
+        return wrapper
+    return decorator
+
+def paginate(count = None, max_limit = 100): # Factory{{{
     def decorator(func):
         def wrapper(*args, **kwargs):
             # Default values
@@ -67,19 +97,24 @@ def paginate(count = None, max_limit = 100): # Factory
             kwargs['limit'] = limit
             ans = func(*args, **kwargs)
 
+            if type(ans) is tuple:
+                (ans,code,headers) = ans
+            else:
+                headers = {}
+
             # enforce limit, in case func forgot
             ans = ans[0:limit]
 
-            headers = {'X-Paginate': json.dumps({
+            headers['X-Paginate'] = json.dumps({
                 'offset': offset,
                 'limit': limit,
                 'total': count(args[0])
-            })}
+            })
             return (ans,None,headers)
         return wrapper
-    return decorator
+    return decorator# }}}
 
-class Device(Resource):
+class Device(Resource):# {{{
     def get(self, mac):
         return DB.Device.get(mac)
 
@@ -95,9 +130,9 @@ class Device(Resource):
         obj = DB.Device.get(mac)
         if obj is None:
             return abort(404)
-        obj.delete()
+        obj.delete()# }}}
 
-class Category(Resource):
+class Category(Resource):# {{{
     def get(self, name):
         return DB.Category.get(name)
 
@@ -114,9 +149,9 @@ class Category(Resource):
         obj = DB.Category.get(name)
         if obj is None:
             return abort(404)
-        obj.delete()
+        obj.delete()# }}}
 
-class Image(Resource):
+class Image(Resource):# {{{
     def get(self, md5):
         return DB.Image.get(md5)
 
@@ -137,9 +172,9 @@ class Image(Resource):
         dest_filename = os.path.join("bin", secure_filename(obj["filename"]))
         if os.path.isfile(dest_filename):
             os.remove(dest_filename)
-        obj.delete()
+        obj.delete()# }}}
 
-class PubKey(Resource):
+class PubKey(Resource):# {{{
     def get(self, description):
         key = DB.PubKey.get(description)
         del key["data"]
@@ -154,30 +189,32 @@ class PubKey(Resource):
 
     def delete(self, description):
         p = DB.PubKey.get(description)
-        p.delete()
+        p.delete()# }}}
 
-class DeviceList(Resource):
+class DeviceList(Resource):# {{{
     def count(self):
         return DB.Device.count()
 
     @paginate(count)
-    def get(self, offset, limit):
+    @sorted()
+    def get(self, offset, limit, orderby):
         #print(f"Get device list offset: {offset}, limit: {limit}")
         #print(request.args)
-        return manager.get_devices(offset, limit, request.args.to_dict())
+        return manager.get_devices(offset, limit, orderby, request.args.to_dict())
 
     def post(self):
         #TODO input sanitation
         DB.Device.new(**request.json).save()
-        return redirect(url_for("api.device", mac=request.json["mac"]))
+        return redirect(url_for("api.device", mac=request.json["mac"]))# }}}
 
-class ImageList(Resource):
+class ImageList(Resource):# {{{
     def count(self):
         return DB.Image.count()
 
     @paginate(count)
-    def get(self, offset, limit):
-        return manager.get_images(offset, limit, request.args.to_dict())
+    @sorted()
+    def get(self, offset, limit, orderby):
+        return manager.get_images(offset, limit, orderby, request.args.to_dict())
 
     def post(self):
         #TODO input sanitation
@@ -197,15 +234,16 @@ class ImageList(Resource):
             f.write(binary)
 
         DB.Image.new(**data).save()
-        return redirect(url_for("api.image", md5=request.json["md5"]))
+        return redirect(url_for("api.image", md5=request.json["md5"]))# }}}
 
 class CategoryList(Resource):
     def count(self):
         return DB.Category.count()
 
     @paginate(count)
-    def get(self, offset, limit):
-        return manager.get_categories(offset, limit, request.args.to_dict())
+    @sorted()
+    def get(self, offset, limit, orderby):
+        return manager.get_categories(offset, limit, orderby, request.args.to_dict())
 
     def post(self):
         #TODO input sanitation
@@ -217,8 +255,9 @@ class PubKeyList(Resource):
         return DB.PubKey.count()
 
     @paginate(count)
-    def get(self, offset, limit):
-        return manager.get_pubkeys(offset, limit, request.args.to_dict())
+    @sorted()
+    def get(self, offset, limit, orderby):
+        return manager.get_pubkeys(offset, limit, orderby, request.args.to_dict())
 
     def post(self):
         data = request.json

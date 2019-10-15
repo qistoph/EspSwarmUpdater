@@ -207,6 +207,13 @@ function TableColumn(label, opts) {
 	} else {
 		th.append(label);
 	}
+	if(true) { //TODO: use opts.sortable?
+		var sort = $(' <i class="fa sort-none"></i>');
+		th.append(sort);
+		sort.on("click", function(e) {
+			console.log(e);
+		});
+	}
 	if(opts.class) {
 		th.addClass(opts.class);
 	}
@@ -390,6 +397,14 @@ function btnEdit_click(e) {
 	});
 }
 
+function getSorting(type) {
+	if(type == 'category') {
+		return ["name:desc"];
+	} else {
+		return [];
+	}
+}
+
 //TODO: pagination
 function refresh(type) {
 	var table = $("#table-"+plural[type]);
@@ -398,7 +413,9 @@ function refresh(type) {
 
 	var offset = pageNr * perPage;
 
-	api[type].list(offset, perPage).done((data, paginate) => {
+	var orderby = getSorting(type);
+
+	api[type].list(offset, perPage, orderby).done((data, paginate) => {
 		backend[plural[type]] = data;
 		table.find("tbody tr").remove()
 		data.forEach((d, i) => window["addRow_"+type](d, paginate.offset+i));
