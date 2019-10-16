@@ -20,9 +20,15 @@
 	.sort-none {
 		filter: opacity(25%);
 	}
-	.sort-none:hover {
+	.sort-none:hover, .sort-asc:hover, .sort-desc:hover {
 		filter: opacity(1);
 		cursor: pointer;
+	}
+	.sort-asc:before {
+		content: "\f0de"; /* From Fontawesome fa-sort-up */
+	}
+	.sort-desc:before {
+		content: "\f0dd"; /* From Fontawesome fa-sort-up */
 	}
 	</style>
 

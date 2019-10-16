@@ -79,14 +79,14 @@ var tables = [
 		"title": "Devices",
 		"columns": [
 			TableColumn("#"),
-			TableColumn(labels.type.device.mac, {"icon":icons.type.device.mac}),
-			TableColumn(labels.type.device.description, {"icon":icons.type.device.description}),
-			TableColumn(labels.type.device.first_seen, {"icon":icons.type.device.first_seen}),
-			TableColumn(labels.type.device.last_seen, {"icon":icons.type.device.last_seen}),
-			TableColumn(labels.type.device.current_version, {"icon":icons.type.device.current_version}),
-			TableColumn(labels.type.device.current_image, {"icon":icons.type.device.current_image}),
-			TableColumn(labels.type.device.desired_image, {"icon":icons.type.device.desired_image}),
-			TableColumn(labels.type.device.category, {"icon":icons.type.device.category}),
+			TypeFieldTableColumn("device", "mac"),
+			TypeFieldTableColumn("device", "description"),
+			TypeFieldTableColumn("device", "first_seen"),
+			TypeFieldTableColumn("device", "last_seen"),
+			TypeFieldTableColumn("device", "current_version"),
+			TypeFieldTableColumn("device", "current_image"),
+			TypeFieldTableColumn("device", "desired_image"),
+			TypeFieldTableColumn("device", "category"),
 			TableColumn(AddButton("device"), {"class":"text-right"}),
 		],
 		"note": "* desired image set on category"
@@ -97,9 +97,9 @@ var tables = [
 		"title": "Categories",
 		"columns": [
 			TableColumn("#"),
-			TableColumn(labels.type.category.name, {"icon":icons.type.category.name}),
-			TableColumn(labels.type.category.desired_image, {"icon":icons.type.category.desired_image}),
-			TableColumn(labels.type.category.num_devices, {"icon":icons.type.category.num_devices}),
+			TypeFieldTableColumn("category", "name"),
+			TypeFieldTableColumn("category", "desired_image"),
+			TypeFieldTableColumn("category", "num_devices", {"sortable":false}),
 			TableColumn(AddButton("category"), {"class":"text-right"}),
 		]
 	},
@@ -109,13 +109,13 @@ var tables = [
 		"title": "Images",
 		"columns": [
 			TableColumn("#"),
-			TableColumn(labels.type.image.description, {"icon":icons.type.image.description}),
-			TableColumn(labels.type.image.md5, {"icon":icons.type.image.md5}),
-			TableColumn(labels.type.image.version, {"icon":icons.type.image.version}),
-			TableColumn(labels.type.image.filename, {"icon":icons.type.image.filename}),
-			TableColumn(labels.type.image.signed, {"icon":icons.type.image.signed}),
-			TableColumn(labels.type.image.added, {"icon":icons.type.image.added}),
-			TableColumn(labels.type.image.last_seen, {"icon":icons.type.image.last_seen}),
+			TypeFieldTableColumn("image", "description"),
+			TypeFieldTableColumn("image", "md5"),
+			TypeFieldTableColumn("image", "version"),
+			TypeFieldTableColumn("image", "filename"),
+			TypeFieldTableColumn("image", "signed"),
+			TypeFieldTableColumn("image", "added"),
+			TypeFieldTableColumn("image", "last_seen"),
 			TableColumn(AddButton("image"), {"class":"text-right"}),
 		]
 	},
@@ -125,8 +125,8 @@ var tables = [
 		"title": "Public Keys",
 		"columns": [
 			TableColumn("#"),
-			TableColumn(labels.type.pubkey.description, {"icon":icons.type.pubkey.description}),
-			TableColumn(labels.type.pubkey.added, {"icon":icons.type.pubkey.added}),
+			TypeFieldTableColumn("pubkey", "description"),
+			TypeFieldTableColumn("pubkey", "added"),
 			TableColumn(AddButton("pubkey"), {"class":"text-right"}),
 		]
 	}
@@ -198,7 +198,7 @@ function Table(opts) {
 function TableColumn(label, opts) {
 	opts = Object.assign({}, opts);
 
-	var th = $(`<th scopy="col"></th>`);
+	var th = $(`<th scope="col"></th>`);
 	if(opts && opts.icon) {
 		th.append(`<i class="fa ${opts.icon}"></i> `);
 	}
@@ -207,16 +207,38 @@ function TableColumn(label, opts) {
 	} else {
 		th.append(label);
 	}
-	if(true) { //TODO: use opts.sortable?
-		var sort = $(' <i class="fa sort-none"></i>');
-		th.append(sort);
-		sort.on("click", function(e) {
-			console.log(e);
-		});
-	}
 	if(opts.class) {
 		th.addClass(opts.class);
 	}
+	return th;
+}
+
+function TypeFieldTableColumn(type, field, opts) {
+	opts = Object.assign({"sortable":true}, opts); // Some defaults
+	opts.icon = icons.type[type][field];
+
+	var th = TableColumn(labels.type[type][field], opts);
+
+	if(opts.sortable) {
+		var sort = $(' <i class="fa sort-none"></i>');
+		th.append(sort);
+		sort.on("click", function(e) {
+			sort.closest("table").find("th[scope=col] .sort-asc").addClass("sort-none").removeClass("sort-asc");
+			sort.closest("table").find("th[scope=col] .sort-desc").addClass("sort-none").removeClass("sort-desc");
+
+			if(sortings[type] && sortings[type].indexOf(field+":asc") >= 0) {
+				sortings[type] = [field+":desc"];
+				sort.removeClass("sort-none");
+				sort.addClass("sort-desc");
+			} else {
+				sortings[type] = [field+":asc"];
+				sort.removeClass("sort-none");
+				sort.addClass("sort-asc");
+			}
+			refresh(type);
+		});
+	}
+
 	return th;
 }
 
@@ -397,23 +419,16 @@ function btnEdit_click(e) {
 	});
 }
 
-function getSorting(type) {
-	if(type == 'category') {
-		return ["name:desc"];
-	} else {
-		return [];
-	}
-}
+var sortings = {};
 
 //TODO: pagination
 function refresh(type) {
 	var table = $("#table-"+plural[type]);
 	var pageNr = parseInt(table.find(".page-nr").val())||0;
 	var perPage = parseInt(table.find(".per-page").val())||10;
+	var orderby = sortings[type];
 
 	var offset = pageNr * perPage;
-
-	var orderby = getSorting(type);
 
 	api[type].list(offset, perPage, orderby).done((data, paginate) => {
 		backend[plural[type]] = data;
