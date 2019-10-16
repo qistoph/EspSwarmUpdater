@@ -60,10 +60,13 @@ class _DBType(dict):
 
         orderby = ""
         if len(order_fields) > 0:
-            #TODO: check {name} is in Props
-            orderby = "ORDER BY " + ", ".join([
-                f"{name} {direction}" for (name, direction) in order_fields
-            ])
+            props = list(filter(lambda p: isinstance(getattr(cls, p), Prop), dir(cls)))
+            def orderStr(name, direction):
+                if name not in props:
+                    raise ValueError(f"Cannot sort by {name}, need {props}")
+                return f"{name} {direction}"
+
+            orderby = "ORDER BY " + ", ".join([orderStr(*a) for a in order_fields])
 
         query = f"SELECT * FROM {table_name} {where} {orderby}"
         for row in query_db(query, where_vals):
@@ -229,18 +232,6 @@ class Device(_DBType):
     current_image = Prop("current_image", str, "^[0-9a-fA-F]{32}$", html_type="ref_image")
     desired_image = Prop("desired_image", str, "^[0-9a-fA-F]{32}$", html_type="ref_image")
     category = Prop("category", str, "^[a-zA-Z]\w+$", html_type="ref_category")
-
-    #TODO: automate this (in base/meta class)
-    field_order = [
-        mac,
-        description,
-        first_seen,
-        last_seen,
-        current_version,
-        current_image,
-        desired_image,
-        category
-    ]
 
     @classmethod
     def new(cls, mac, description = None, first_seen = None, last_seen = None, current_version = None, current_image = None, desired_image = None, category = None):
