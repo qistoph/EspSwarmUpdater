@@ -78,17 +78,30 @@ var tables = [
 		"id": "table-devices",
 		"title": "Devices",
 		"columns": [
-			TableColumn("#"),
+			NrTableColumn(),
 			TypeFieldTableColumn("device", "mac"),
 			TypeFieldTableColumn("device", "description"),
-			TypeFieldTableColumn("device", "first_seen"),
-			TypeFieldTableColumn("device", "last_seen"),
+			TypeFieldTableColumn("device", "first_seen", {
+				"getText":(data,idx)=>dateOrEmpty(data["first_seen"])}),
+			TypeFieldTableColumn("device", "last_seen", {
+				"getText":(data,idx)=>durationOrEmpty(data["last_seen"]),
+				"getTitle":(data,idx)=>dateOrEmpty(data["last_seen"])
+			}),
 			TypeFieldTableColumn("device", "current_version"),
-			TypeFieldTableColumn("device", "current_image"),
-			TypeFieldTableColumn("device", "desired_image"),
-			TypeFieldTableColumn("device", "category"),
-			TableColumn(AddButton("device"), {"class":"text-right"}),
+			TypeFieldTableColumn("device", "current_image", {
+				//TODO: unknown current_image should not be a link
+				"onValueClick": (data, idx)=>hl_image(data["current_image"])
+			}),
+			TypeFieldTableColumn("device", "desired_image", {
+				"getText":(data,idx)=>(data["desired_image"]["md5"]||"")+(data["desired_image"]["source"]!="device"?"*":""),
+				"onValueClick": (data, idx)=>hl_image(data["desired_image"]["md5"])
+			}),
+			TypeFieldTableColumn("device", "category", {
+				"onValueClick": (data, idx)=>hl_category(data["category"])
+			}),
+			ButtonTableColumn("device", "mac"),
 		],
+		"createRow": DeviceTableRow,
 		"note": "* desired image set on category"
 	},
 	{
@@ -96,39 +109,54 @@ var tables = [
 		"id": "table-categories",
 		"title": "Categories",
 		"columns": [
-			TableColumn("#"),
+			NrTableColumn(),
 			TypeFieldTableColumn("category", "name"),
 			TypeFieldTableColumn("category", "desired_image"),
-			TypeFieldTableColumn("category", "num_devices", {"sortable":false}),
-			TableColumn(AddButton("category"), {"class":"text-right"}),
-		]
+			TypeFieldTableColumn("category", "num_devices", {
+				"sortable":false,
+				"onValueClick":(data,idx)=>hl_devices(data["name"])
+			}),
+			ButtonTableColumn("category", "name"),
+		],
+		"createRow": CategoryTableRow,
 	},
 	{
 		"type": "image",
 		"id": "table-images",
 		"title": "Images",
 		"columns": [
-			TableColumn("#"),
+			NrTableColumn(),
 			TypeFieldTableColumn("image", "description"),
 			TypeFieldTableColumn("image", "md5"),
 			TypeFieldTableColumn("image", "version"),
 			TypeFieldTableColumn("image", "filename"),
-			TypeFieldTableColumn("image", "signed"),
-			TypeFieldTableColumn("image", "added"),
-			TypeFieldTableColumn("image", "last_seen"),
-			TableColumn(AddButton("image"), {"class":"text-right"}),
-		]
+			TypeFieldTableColumn("image", "signed", {
+				"getText":(data,idx)=>data["signed"]?"Yes":"No"
+			}),
+			TypeFieldTableColumn("image", "added", {
+				"getText":(data,idx)=>dateOrEmpty(data["added"])
+			}),
+			TypeFieldTableColumn("image", "last_seen", {
+				"getText":(data,idx)=>durationOrEmpty(data["last_seen"]),
+				"getTitle":(data,idx)=>dateOrEmpty(data["last_seen"])
+			}),
+			ButtonTableColumn("image", "md5"),
+		],
+		"createRow": ImageTableRow,
 	},
 	{
 		"type": "pubkey",
 		"id": "table-pubkeys",
 		"title": "Public Keys",
 		"columns": [
-			TableColumn("#"),
+			NrTableColumn(),
 			TypeFieldTableColumn("pubkey", "description"),
-			TypeFieldTableColumn("pubkey", "added"),
-			TableColumn(AddButton("pubkey"), {"class":"text-right"}),
-		]
+			TypeFieldTableColumn("image", "added", {
+				"getText":(data,idx)=>dateOrEmpty(data["added"])
+			}),
+			ButtonTableColumn("pubkey", "description"),
+		],
+		"createRow": PubkeyTableRow,
 	}
 ];
 
@@ -162,6 +190,22 @@ $.fn.datetimepicker.Constructor.Default = $.extend({}, $.fn.datetimepicker.Const
 
 var backend_types = [];
 var backend = {}; // Ref to stored known backend values
+
+function dateOrEmpty(val) {
+	if(val) {
+		return moment.unix(val).format("lll");
+	} else {
+		return "";
+	}
+}
+
+function durationOrEmpty(val) {
+	if(val) {
+		return moment.unix(val).fromNow();
+	} else {
+		return "";
+	}
+}
 
 function Table(opts) {
 	var table = $(`<table class="table table-hover" id="${opts.id}">`);
@@ -210,11 +254,76 @@ function TableColumn(label, opts) {
 	if(opts.class) {
 		th.addClass(opts.class);
 	}
+	th.getValue = function(text) {
+		return $(`<td>${text}</td>`);
+	};
+	return th;
+}
+
+function NrTableColumn() {
+	var th = TableColumn('#');
+	th.getValue = function(data, idx) {
+		return $(`<th scope="row">${idx+1}</th>`);
+	};
+	return th;
+}
+
+function ButtonTableColumn(type, keyfield) {
+	var th = TableColumn();
+	th.addClass("text-right");
+	th.append(AddButton(type));
+
+	th.getValue = function(data, idx) {
+		var buttonsTd = $('<td class="text-right" style="white-space: nowrap"></td>');
+
+		var id = data[keyfield];
+		var btnDelete = $(`<button class="btn btn-danger btn-sm deletebtn" data-type="${type}" data-id="${id}"><i class="fa fa-trash"></i></button>`);
+		var btnEdit = $(`<button class="btn btn-primary btn-sm editbtn" data-type="${type}" data-id="${id}"><i class="fa fa-edit"></i></button>`);
+
+		btnDelete.on("click", btnDelete_click);
+		btnEdit.on("click", btnEdit_click);
+
+		buttonsTd.append(btnDelete, ' ', btnEdit);
+		return buttonsTd;
+	};
+
 	return th;
 }
 
 function TypeFieldTableColumn(type, field, opts) {
-	opts = Object.assign({"sortable":true}, opts); // Some defaults
+	opts = Object.assign({
+		"sortable":true,
+		"nullValue":"",
+		"getText": function(data, idx) {
+			return data[field]||opts.nullValue;
+		},
+		"getTitle": function(data, idx) {
+			return "";
+		},
+		"onValueClick": undefined,
+		"getValue": function(data, idx) {
+			var td = $('<td>');
+			var text = opts.getText(data, idx);
+			var title = opts.getTitle(data, idx);
+
+			if(opts.onValueClick) {
+				var link = $('<a href="#"></a>');
+				link.text(text);
+				link.on("click", (e)=>{
+					opts.onValueClick(data, idx, e);
+				});
+				text = link;
+			}
+
+			if(title) {
+				td.attr("title", title);
+			}
+
+			td.append(text);
+			return td;
+			//return $(`<td>${data[field]||opts.nullValue}</td>`);
+		}
+	}, opts); // Some defaults
 	opts.icon = icons.type[type][field];
 
 	var th = TableColumn(labels.type[type][field], opts);
@@ -239,7 +348,43 @@ function TypeFieldTableColumn(type, field, opts) {
 		});
 	}
 
+	th.getValue = opts.getValue;
 	return th;
+}
+
+function TableRow(idx, data, columns) {
+	var tr = $('<tr>');
+	columns.forEach(function(col) {
+		tr.append(col.getValue(data, idx));
+	});
+	return tr;
+}
+
+function DeviceTableRow(idx, data, columns) {
+	var $tr = TableRow(idx, data, columns);
+	$tr.attr("data-dev-cat", data["category"]);
+	if(data["desired_image"] && data["desired_image"]["md5"] != data["current_image"]) {
+		$tr.addClass("bg-warning");
+	}
+	return $tr;
+}
+
+function CategoryTableRow(idx, data, columns) {
+	var $tr = TableRow(idx, data, columns);
+	$tr.attr("data-cat-name", data["name"]);
+	return $tr;
+}
+
+function ImageTableRow(idx, data, columns) {
+	var $tr = TableRow(idx, data, columns);
+	$tr.attr("data-img-md5", data["md5"]);
+	return $tr;
+}
+
+function PubkeyTableRow(idx, data, columns) {
+	var $tr = TableRow(idx, data, columns);
+	$tr.attr("data-pubkey-name", data["description"]);
+	return $tr;
 }
 
 function AddButton(type) {
@@ -252,7 +397,7 @@ function highlight_scroll(targets) {
 	targets.addClass("bg-info")
 	$('html, body').animate({
 		scrollTop: targets.offset().top
-	}, 2000);
+	}, 1000);
 }
 
 function hl_image(md5) {
@@ -268,103 +413,6 @@ function hl_category(name) {
 function hl_devices(category) {
 	highlight_scroll($(`tr[data-dev-cat='${category}']`));
 	return false;
-}
-
-function object_buttons(type, id) {
-	var btnDelete = $(`<button class="btn btn-danger btn-sm deletebtn" data-type="${type}" data-id="${id}"><i class="fa fa-trash"></i></button>`);
-	var btnEdit = $(`<button class="btn btn-primary btn-sm editbtn" data-type="${type}" data-id="${id}"><i class="fa fa-edit"></i></button>`);
-
-	btnDelete.on("click", btnDelete_click);
-	btnEdit.on("click", btnEdit_click);
-
-	return [btnDelete, ' ', btnEdit];
-}
-
-function addRow_device(data, idx) {
-	var key = data["mac"];
-
-	var tr = $(`
-		<tr data-dev-cat="${data["category"]}">
-			<th scope="row">${idx+1}</th>
-			<td>${data["mac"]}</td>
-			<td>${data["description"]||""}</td>
-			<td>${data["first_seen"]?moment.unix(data["first_seen"]).format("lll"):""}</td>
-			<td title="${data["last_seen"]?moment.unix(data["last_seen"]).format("lll"):""}">${data["last_seen"]?moment.unix(data["last_seen"]).fromNow():""}</td>
-			<td>${data["current_version"]||""}</td>
-			<td><a href="#" onClick="return hl_image('${data["current_image"]}')">${data["current_image"]||"unknown"}</a></td>
-			<td><a href="#" onClick="return hl_image('${data["desired_image"]["md5"]}')">${data["desired_image"]["md5"]||""}</a>${(data["desired_image"]["source"] != "device")?"*":""}</td>
-			<td><a href="#" onClick="return hl_category('${data["category"]}')">${data["category"]||""}</a></td>
-		</tr>
-	`);
-	//TODO: unknown current_image should not be a link
-
-	if(data["desired_image"] && data["desired_image"]["md5"] != data["current_image"]) {
-		tr.addClass("bg-warning");
-	}
-
-	var buttonsTd = $('<td class="text-right" style="white-space: nowrap"></td>');
-	buttonsTd.append(object_buttons('device', key));
-	tr.append(buttonsTd);
-
-	$("#table-devices tbody").append(tr);
-}
-
-function addRow_category(data, idx) {
-	var key = data["name"];
-
-	var tr = $(`
-		<tr data-cat-name="${key}">
-			<th scope="row">${idx+1}</th>
-			<td>${data["name"]}</td>
-			<td>${data["desired_image"]||""}</td>
-			<td><a href="#" onClick="return hl_devices('${data["name"]}')">${data["num_devices"]}</a></td>
-		</tr>`);
-
-	var buttonsTd = $('<td class="text-right" style="white-space: nowrap"></td>');
-	buttonsTd.append(object_buttons('category', key));
-	tr.append(buttonsTd);
-
-	$("#table-categories tbody").append(tr);
-}
-
-function addRow_image(data, idx) {
-	var key = data["md5"];
-
-	var tr = $(`
-		<tr data-img-md5="${key}">
-			<th>${idx+1}</th>
-			<td>${data["description"]||""}</td>
-			<td>${data["md5"]}</td>
-			<td>${data["version"]||""}</td>
-			<td>${data["filename"]||""}</td>
-			<td>${data["signed"]?"Yes":"No"}</td>
-			<td>${data["added"]?moment.unix(data["added"]).format("lll"):""}</td>
-			<td title="${data["last_seen"]?moment.unix(data["last_seen"]).format("lll"):""}">${data["last_seen"]?moment.unix(data["last_seen"]).fromNow():""}</td>
-		</tr>`);
-	//TODO: signed: yes/no => valid/invalid/no
-
-	var buttonsTd = $('<td class="text-right" style="white-space: nowrap"></td>');
-	buttonsTd.append(object_buttons('image', key));
-	tr.append(buttonsTd);
-
-	$("#table-images tbody").append(tr);
-}
-
-function addRow_pubkey(data, idx) {
-	var key = data["description"];
-
-	var tr = $(`
-		<tr data-pubkey-name="${key}">
-			<th scope="row">${idx+1}</th>
-			<td>${data["description"]}</td>
-			<td>${data["added"]?moment.unix(data["added"]).format("lll"):""}</td>
-		</tr>`);
-
-	var buttonsTd = $('<td class="text-right" style="white-space: nowrap"></td>');
-	buttonsTd.append(object_buttons('pubkey', key));
-	tr.append(buttonsTd);
-
-	$("#table-pubkeys tbody").append(tr);
 }
 
 function btnDelete_click(e){
@@ -428,12 +476,15 @@ function refresh(type) {
 	var perPage = parseInt(table.find(".per-page").val())||10;
 	var orderby = sortings[type];
 
+	var tableInfo = tables.find(t=>t.type==type);
+
 	var offset = pageNr * perPage;
 
 	api[type].list(offset, perPage, orderby).done((data, paginate) => {
 		backend[plural[type]] = data;
 		table.find("tbody tr").remove()
-		data.forEach((d, i) => window["addRow_"+type](d, paginate.offset+i));
+		var rows = data.map((d, i) => tableInfo.createRow(paginate.offset+i, d, tableInfo.columns));
+		table.find("tbody").append(rows);
 		// TODO: rename cur-page and total-pages to *-records
 		table.find(".cur-page").text(`${paginate.offset+1}-${paginate.offset+data.length}`);
 		table.find(".total-pages").text(`${paginate.total}`);
