@@ -29,8 +29,6 @@ void SwarmUpdaterClass::update(String version_string, bool ssl) {
       // Print details for each service found
       Serial.print(i + 1);
       Serial.print(": ");
-      Serial.print(MDNS.serviceDomain(i));
-      Serial.print(" - ");
       Serial.print(MDNS.hostname(i));
       Serial.print(" (");
       Serial.print(MDNS.IP(i));
