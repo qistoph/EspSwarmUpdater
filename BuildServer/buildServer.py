@@ -17,8 +17,8 @@ fqbn = "esp8266com:esp8266:d1_mini:xtal=80,vt=flash,exception=disabled,ssl=all,e
 logger="machine"
 warnings="all"
 extra="-verbose"
-version_string = "SwarmUpdater-BS-1"
-category = "Category1a"
+version_string = "SwarmUpdater-BS-5"
+category = "Category1b"
 
 api = SwarmApi("http://127.0.0.1:5000/api", "V293LCB5b3UgaGFja2VyISBMT0wgOkQ=")
 
@@ -70,11 +70,16 @@ if result.returncode == 0:
     if success:
         data = res.json()
         print("Upload done, MD5:", data['md5'])
-        api.update_category(category, data['md5'])
+        (success, res) = api.update_category(category, data['md5'])
+        if success:
+            print("Category updated")
+        else:
+            print("Category could not be updated");
+            print(res.text)
     else:
         print("Upload failed")
-        import pdb
-        pdb.set_trace()
+        #import pdb
+        #pdb.set_trace()
         print(res.text)
 else:
     print("Failed:")

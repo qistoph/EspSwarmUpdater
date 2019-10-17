@@ -41,6 +41,13 @@ class SwarmApi:
 
     def update_category(self, name, desired_image):
         res = self._get("/category/" + name)
+        if res.status_code != 200:
+            return (False, res)
+        if res.json() is None:
+            raise ValueError("Unknown category")
+
+        #import pdb
+        #pdb.set_trace()
         category = res.json()
         category['desired_image'] = desired_image
         res = self._put("/category/" + name, category)
