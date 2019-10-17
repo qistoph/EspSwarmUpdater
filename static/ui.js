@@ -396,7 +396,7 @@ function highlight_scroll(targets) {
 	$("tr.bg-info").removeClass("bg-info")
 	targets.addClass("bg-info")
 	$('html, body').animate({
-		scrollTop: targets.offset().top
+		scrollTop: targets.offset().top - $(".navbar").outerHeight()
 	}, 1000);
 }
 
