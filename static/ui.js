@@ -501,7 +501,7 @@ $(function() {
 	// On page load
 	
 	tables.forEach(function(conf) {
-		var h2 = $(`<h2>${conf.title}</h2>`);
+		var h2 = $(`<h2 id=${conf.type}>${conf.title}</h2>`);
 		var table = Table(conf);
 		$(document.body).append(h2).append(table);
 	});

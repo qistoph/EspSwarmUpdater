@@ -4,47 +4,80 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-	<link rel="stylesheet" href="static/libs/bootstrap-4.3.1-dist/css/bootstrap.min.css" />
-	<link rel="stylesheet" href="static/libs/bootstrap4-toggle/css/bootstrap4-toggle.min.css" />
-	<link rel="stylesheet" href="static/libs/tempusdominus-bootstrap-5.0.0-alph14/tempusdominus-bootstrap-4.min.css" />
-	<link rel="stylesheet" href="static/libs/fontawesome-free-5.11.2-web/css/all.min.css" />
+    <link rel="stylesheet" href="static/libs/bootstrap-4.3.1-dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="static/libs/bootstrap4-toggle/css/bootstrap4-toggle.min.css" />
+    <link rel="stylesheet" href="static/libs/tempusdominus-bootstrap-5.0.0-alph14/tempusdominus-bootstrap-4.min.css" />
+    <link rel="stylesheet" href="static/libs/fontawesome-free-5.11.2-web/css/all.min.css" />
 
-	<style>
-	.table-hover tbody tr:hover {
-		filter: brightness(85%);
-	}
+    <style>
+    .table-hover tbody tr:hover {
+      filter: brightness(85%);
+    }
 
-	.sort-none:before{
-		content:"\f0dc" /* From Fontawesome fa-sort */
-	}
-	.sort-none {
-		filter: opacity(25%);
-	}
-	.sort-none:hover, .sort-asc:hover, .sort-desc:hover {
-		filter: opacity(1);
-		cursor: pointer;
-	}
-	.sort-asc:before {
-		content: "\f0de"; /* From Fontawesome fa-sort-up */
-	}
-	.sort-desc:before {
-		content: "\f0dd"; /* From Fontawesome fa-sort-up */
-	}
-	</style>
+    .sort-none:before{
+      content:"\f0dc" /* From Fontawesome fa-sort */
+    }
+    .sort-none {
+      filter: opacity(25%);
+    }
+    .sort-none:hover, .sort-asc:hover, .sort-desc:hover {
+      filter: opacity(1);
+      cursor: pointer;
+    }
+    .sort-asc:before {
+      content: "\f0de"; /* From Fontawesome fa-sort-up */
+    }
+    .sort-desc:before {
+      content: "\f0dd"; /* From Fontawesome fa-sort-up */
+    }
+
+    body {
+      margin-top: 40px; /* Make room for the nav bar */
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+    /* make room for the nav bar */
+    h1[id],
+    h2[id],
+    h3[id],
+    h4[id],
+    h5[id],
+    h6[id],
+    dt[id]{
+      padding-top: 60px;
+      margin-top: -40px;
+    }
+    </style>
 
     <title>ESP Swarm Updater</title>
   </head>
-  <body>
-    <h1>ESP Swarm Updater</h1>
+  <body data-spy="scroll" data-target="#navbar-main" data-offset="40">
+    <nav id="navbar-main" class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+      <span class="navbar-brand">ESP Swarp Updater</span>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-item nav-link" href="#device">Devices</a>
+          <a class="nav-item nav-link active" href="#category">Categories</a>
+          <a class="nav-item nav-link" href="#image">Images</a>
+          <a class="nav-item nav-link" href="#pubkey">Pubkeys</a>
+        </div>
+      </div>
+    </nav>
 
-	<script src="static/libs/jquery-3.4.1.min.js"></script>
-	<script src="static/libs/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
-	<script src="static/libs/bootstrap4-toggle/js/bootstrap4-toggle.min.js"></script>
-	<script src="static/libs/bootbox/bootbox.js"></script>
-	<script src="static/libs/bootbox/bootbox.locales.js"></script>
-	<script src="static/libs/moment_js/moment-with-locales.js"></script>
+    <!--<div id="content" data-spy="scroll" data-target="#navbar-main" data-offset="0" style="position: relative; overflow-y: scroll; height: 100%">
+    </div>-->
 
-	<script type="text/javascript" src="static/libs/tempusdominus-bootstrap-5.0.0-alph14/tempusdominus-bootstrap-4.min.js"></script>
+    <script src="static/libs/jquery-3.4.1.min.js"></script>
+    <script src="static/libs/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
+    <script src="static/libs/bootstrap4-toggle/js/bootstrap4-toggle.min.js"></script>
+    <script src="static/libs/bootbox/bootbox.js"></script>
+    <script src="static/libs/bootbox/bootbox.locales.js"></script>
+    <script src="static/libs/moment_js/moment-with-locales.js"></script>
+
+    <script type="text/javascript" src="static/libs/tempusdominus-bootstrap-5.0.0-alph14/tempusdominus-bootstrap-4.min.js"></script>
 
     <script src="static/api.js"></script>
     <script src="static/popform.js"></script>
