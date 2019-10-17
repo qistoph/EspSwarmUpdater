@@ -24,7 +24,6 @@ def check_apikey(apikey):
 
 def login_required(func):
     def wrapper(*args, **kwargs):
-        print("login_required")
         auth = request.authorization
         apikey = request.headers.get('X-APIKEY')
         if not (auth and check_auth(auth.username, auth.password) or check_apikey(apikey)):

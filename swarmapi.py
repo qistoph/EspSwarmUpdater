@@ -72,10 +72,11 @@ def sorted(): # Factory
                 (ans,code,headers) = ans
             else:
                 headers = {}
+                code = None
 
             headers['X-Order'] = json.dumps([f"{name}:{dire}" for (name, dire) in kwargs['orderby'] ])
 
-            return (ans,None,headers)
+            return (ans,code,headers)
         return wrapper
     return decorator
 
@@ -102,6 +103,7 @@ def paginate(count = None, max_limit = 100): # Factory{{{
                 (ans,code,headers) = ans
             else:
                 headers = {}
+                code = None
 
             # enforce limit, in case func forgot
             ans = ans[0:limit]
@@ -111,7 +113,7 @@ def paginate(count = None, max_limit = 100): # Factory{{{
                 'limit': limit,
                 'total': count(args[0])
             })
-            return (ans,None,headers)
+            return (ans,code,headers)
         return wrapper
     return decorator# }}}
 
