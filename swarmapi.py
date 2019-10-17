@@ -181,7 +181,7 @@ class Image(Resource):# {{{
         if obj is None:
             return abort(404)
 
-        dest_filename = os.path.join("bin", secure_filename(obj["filename"]))
+        dest_filename = os.path.join("bin", secure_filename(obj["md5"]))
         if os.path.isfile(dest_filename):
             os.remove(dest_filename)
         obj.delete()# }}}
@@ -245,9 +245,9 @@ class ImageList(Resource):# {{{
         data["signed"] = manager.is_image_signed(binary)
         data["added"] = time.time()
 
-        dest_filename = os.path.join("bin", secure_filename(data["filename"]))
+        dest_filename = os.path.join("bin", secure_filename(data["md5"]))
         if os.path.isfile(dest_filename):
-            raise ValueError("Filename already in use")
+            raise ValueError("Filename (MD5) already in use")
 
         with open(dest_filename, "wb") as f:
             f.write(binary)

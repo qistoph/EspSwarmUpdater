@@ -65,7 +65,7 @@ def get_image_data(md5):
     assert image is not None, f"No image with MD5 {md5}"
 
     version = image["version"]
-    filename = image["filename"]
+    filename = image["md5"]
 
     with open(f"./bin/{filename}", "rb") as f:
         data = f.read()
