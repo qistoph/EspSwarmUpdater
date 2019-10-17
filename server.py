@@ -10,7 +10,7 @@ from io import BytesIO
 
 import MdnsAnnounce
 import manager
-from tools import md5sum
+from tools import md5sum, login_required
 import swarmapi
 import swarmdb
 
@@ -23,6 +23,11 @@ config = {
     "loglevel": logging.DEBUG,
     "locale": "en_US",
     "debug": True,
+    "auth": {
+        "username": "chris",
+        "password": "lol",
+        "apikey": "V293LCB5b3UgaGFja2VyISBMT0wgOkQ=", # Set your own secret random key to use as API-key
+    },
     "mdns": {
         "ip": '192.168.178.108', # IP to use in mDNS announcements, ESPs should reach the host on this IP
         #TODO: announce all local IP's after sketch is fixed to allow multiple IPs (Using MDNSServiceQueryCallback)
@@ -47,6 +52,7 @@ def check_esp_headers(func):
     return func_wrapper
 
 @app.route("/")
+@login_required
 def index():
     kwargs={}
     kwargs["devices"] = manager.get_devices()

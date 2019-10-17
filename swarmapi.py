@@ -13,6 +13,7 @@ import logging
 import manager
 import swarmdb as DB
 import crypto
+import tools
 
 if sys.version_info[0] != 3 or sys.version_info[1] < 6:
     print("This script requires Python version 3.6")
@@ -115,9 +116,11 @@ def paginate(count = None, max_limit = 100): # Factory{{{
     return decorator# }}}
 
 class Device(Resource):# {{{
+    @tools.login_required
     def get(self, mac):
         return DB.Device.get(mac)
 
+    @tools.login_required
     def put(self, mac):
         #TODO input sanitation
         d = DB.Device.get(mac)
@@ -126,6 +129,7 @@ class Device(Resource):# {{{
         new_mac = request.json["mac"]
         return self.get(new_mac)
 
+    @tools.login_required
     def delete(self, mac): #TODO input sanitation
         obj = DB.Device.get(mac)
         if obj is None:
@@ -133,9 +137,11 @@ class Device(Resource):# {{{
         obj.delete()# }}}
 
 class Category(Resource):# {{{
+    @tools.login_required
     def get(self, name):
         return DB.Category.get(name)
 
+    @tools.login_required
     def put(self, name):
         #TODO input sanitation
         c = DB.Category.get(name)
@@ -144,6 +150,7 @@ class Category(Resource):# {{{
         new_name = request.json["name"]
         return self.get(new_name)
 
+    @tools.login_required
     def delete(self, name):
         #TODO input sanitation
         obj = DB.Category.get(name)
@@ -152,9 +159,11 @@ class Category(Resource):# {{{
         obj.delete()# }}}
 
 class Image(Resource):# {{{
+    @tools.login_required
     def get(self, md5):
         return DB.Image.get(md5)
 
+    @tools.login_required
     def put(self, md5):
         #TODO input sanitation
         i = DB.Image.get(md5)
@@ -163,6 +172,7 @@ class Image(Resource):# {{{
         new_md5 = request.json["md5"]
         return self.get(new_md5)
 
+    @tools.login_required
     def delete(self, md5):
         #TODO input sanitation
         obj = DB.Image.get(md5)
@@ -175,11 +185,13 @@ class Image(Resource):# {{{
         obj.delete()# }}}
 
 class PubKey(Resource):# {{{
+    @tools.login_required
     def get(self, description):
         key = DB.PubKey.get(description)
         del key["data"]
         return key
 
+    @tools.login_required
     def put(self, description):
         p = DB.PubKey.get(description)
         p.update(**request.json)
@@ -187,6 +199,7 @@ class PubKey(Resource):# {{{
         new_desc = request.json["description"]
         return self.get(new_desc)
 
+    @tools.login_required
     def delete(self, description):
         p = DB.PubKey.get(description)
         p.delete()# }}}
@@ -197,11 +210,13 @@ class DeviceList(Resource):# {{{
 
     @paginate(count)
     @sorted()
+    @tools.login_required
     def get(self, offset, limit, orderby):
         #print(f"Get device list offset: {offset}, limit: {limit}")
         #print(request.args)
         return manager.get_devices(offset, limit, orderby, request.args.to_dict())
 
+    @tools.login_required
     def post(self):
         #TODO input sanitation
         DB.Device.new(**request.json).save()
@@ -213,9 +228,11 @@ class ImageList(Resource):# {{{
 
     @paginate(count)
     @sorted()
+    @tools.login_required
     def get(self, offset, limit, orderby):
         return manager.get_images(offset, limit, orderby, request.args.to_dict())
 
+    @tools.login_required
     def post(self):
         #TODO input sanitation
 
@@ -242,9 +259,11 @@ class CategoryList(Resource):
 
     @paginate(count)
     @sorted()
+    @tools.login_required
     def get(self, offset, limit, orderby):
         return manager.get_categories(offset, limit, orderby, request.args.to_dict())
 
+    @tools.login_required
     def post(self):
         #TODO input sanitation
         DB.Category.new(**request.json).save()
@@ -256,9 +275,11 @@ class PubKeyList(Resource):
 
     @paginate(count)
     @sorted()
+    @tools.login_required
     def get(self, offset, limit, orderby):
         return manager.get_pubkeys(offset, limit, orderby, request.args.to_dict())
 
+    @tools.login_required
     def post(self):
         data = request.json
         data["added"] = time.time()
@@ -272,6 +293,7 @@ class PubKeyList(Resource):
         return redirect(url_for("api.pubkey", description=request.json["description"]))
 
 class ImageBinary(Resource):
+    @tools.login_required
     def get(self, md5):
         (file_version, file_name, file_md5, file_data) = manager.get_image_data(md5)
         response = make_response(send_file(BytesIO(file_data), as_attachment=True, attachment_filename=file_name))
