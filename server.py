@@ -18,13 +18,13 @@ logger = logging.getLogger("server")
 app = Flask(__name__)
 
 config = {
-    "host": '0.0.0.0',
-    "port": 5000,
+    "host": '0.0.0.0', # Listening IP
+    "port": 5000, # Listening Port
     "loglevel": logging.DEBUG,
     "locale": "en_US",
     "debug": True,
     "mdns": {
-        "ip": '192.168.178.108', # IP to use in mDNS announcements
+        "ip": '192.168.178.108', # IP to use in mDNS announcements, ESPs should reach the host on this IP
         #TODO: announce all local IP's after sketch is fixed to allow multiple IPs (Using MDNSServiceQueryCallback)
         "debug": False
     }

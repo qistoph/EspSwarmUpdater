@@ -5,3 +5,27 @@ echo -n -prefs "$(/home/chris/arduino-1.8.9/arduino-builder -dump-prefs -logger=
 
 https://github.com/arduino/arduino-builder
 https://github.com/arduino/arduino-builder/wiki/Doing-continuous-integration-with-arduino-builder
+
+Build server installation:
+go get github.com/arduino/arduino-builder
+mkdir Builder
+cd Builder
+go build github.com/arduino/arduino-builder
+mkdir -p hardware/esp8266com/
+cd hardware/esp8266com/
+git clone --depth=1 http://github.com/esp8266/Arduino.git esp8266
+cd esp8266/
+git submodule update --init
+cd tools/ #hardware/esp8266com/esp8266/tools
+python3 get.py
+
+# Get the Arduino ctags binary in Builder/tools
+cd ~
+git clone https://github.com/arduino/ctags
+cd ctags
+./configure
+make
+cp ctags Builder/tools/
+
+
+./arduino-builder -compile -logger=humantags -hardware hardware/ -libraries libraries/ -tools asdf -fqbn=esp8266com:esp8266:d1_mini:xtal=80,vt=flash,exception=disabled,ssl=all,eesz=4M2M,ip=lm2f,dbg=Serial,lvl=HTTP_UPDATE,wipe=none,baud=921600 -warnings=all -prefs "build.extra_flags=-DESP8266 -DVERSION_STRING=\"Builder-Build\"" -prefs "runtime.tools.ctags.path=/home/lu/Builder/tools" -verbose repos/EspSwarmUpdater/EspSwarmUpdater.ino
