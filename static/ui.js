@@ -271,6 +271,8 @@ function NrTableColumn() {
 function ButtonTableColumn(type, keyfield) {
 	var th = TableColumn();
 	th.addClass("text-right");
+	th.append(RefreshButton(type));
+	th.append(" ");
 	th.append(AddButton(type));
 
 	th.getValue = function(data, idx) {
@@ -387,8 +389,19 @@ function PubkeyTableRow(idx, data, columns) {
 	return $tr;
 }
 
+function RefreshButton(type) {
+	var btn = $(`<button class="btn btn-primary btn-sm"><i class="fa fa-sync-alt"></i></button>`);
+	btn.on("click", function() {
+		refresh(type);
+	});
+	return btn;
+}
+
 function AddButton(type) {
 	var btn = $(`<button class="btn btn-primary btn-sm addbtn" data-type="${type}"><i class="fa fa-plus"></i></button>`);
+	btn.on("click", function() {
+		showEditPrompt(type, true);
+	});
 	return btn;
 }
 
@@ -453,11 +466,6 @@ function btnDelete_click(e){
 	});
 }
 
-function btnAdd_click(e) {
-	var type = $(e.delegateTarget).data("type");
-	showEditPrompt(type, true);
-}
-
 function btnEdit_click(e) {
 	var d = $(e.delegateTarget).data();
 	//TODO: show spinner while loading?
@@ -505,8 +513,6 @@ $(function() {
 		var table = Table(conf);
 		$(document.body).append(h2).append(table);
 	});
-
-	$(".addbtn").on("click", btnAdd_click);
 
 	refresh("device");
 	refresh("category");
