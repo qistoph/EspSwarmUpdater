@@ -92,6 +92,11 @@ def db_exception_handler(exception):
     logger.error("Exception:" + str(exception))
     return 'Something wrong', 500
 
+@app.errorhandler(ValueError)
+def value_error_handler(error):
+    logger.error("Error:" + str(error))
+    return str(error), 400
+
 @app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, '_database', None)

@@ -670,6 +670,8 @@ function showEditPrompt(type, isnew, data) {
 			var message = "An error occured while saving. Please try again.";
 			if(xhr.responseJSON && xhr.responseJSON.message) {
 				message = xhr.responseJSON.message;
+			} else if(xhr.responseText) {
+				message = xhr.responseText;
 			}
 
 			bootbox.alert({
