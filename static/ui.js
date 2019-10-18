@@ -28,6 +28,7 @@ window.labels = {
 			"version": "Version",
 			"filename": "Filename",
 			"signed": "Signed",
+			"pubkey": "PubKey",
 			"added": "Added",
 			"last_seen": "Last seen",
 		},
@@ -61,6 +62,7 @@ window.icons = {
 			"version": "fa-barcode",
 			"filename": "fa-file-code",
 			"signed": "fa-file-signature",
+			"pubkey": "fa-key",
 			"added": "fa-calendar",
 			"last_seen": "fa-hourglass-half",
 		},
@@ -127,11 +129,17 @@ var tables = [
 		"columns": [
 			NrTableColumn(),
 			TypeFieldTableColumn("image", "description"),
-			TypeFieldTableColumn("image", "md5"),
+			TypeFieldTableColumn("image", "md5", {
+				"getHref":(data,idx)=>"/api/image/"+data["md5"]+"/binary"
+			}),
 			TypeFieldTableColumn("image", "version"),
 			TypeFieldTableColumn("image", "filename"),
 			TypeFieldTableColumn("image", "signed", {
 				"getText":(data,idx)=>data["signed"]?"Yes":"No"
+			}),
+			TypeFieldTableColumn("image", "pubkey", {
+				"getText":(data,idx)=>data["signed"]?data["pubkey"]?data["pubkey"]:"unknown":"",
+				"onValueClick":(data,idx)=>hl_pubkeys(data["pubkey"])
 			}),
 			TypeFieldTableColumn("image", "added", {
 				"getText":(data,idx)=>dateOrEmpty(data["added"])
@@ -302,14 +310,19 @@ function TypeFieldTableColumn(type, field, opts) {
 		"getTitle": function(data, idx) {
 			return "";
 		},
+		"getHref": function(data, idx) {
+			return "#";
+		},
 		"onValueClick": undefined,
 		"getValue": function(data, idx) {
 			var td = $('<td>');
 			var text = opts.getText(data, idx);
 			var title = opts.getTitle(data, idx);
 
-			if(opts.onValueClick) {
-				var link = $('<a href="#"></a>');
+			var href = opts.getHref(data, idx);
+			if(opts.onValueClick || href != '#') {
+				var link = $('<a></a>');
+				link.attr("href", opts.getHref(data, idx));
 				link.text(text);
 				link.on("click", (e)=>{
 					opts.onValueClick(data, idx, e);
@@ -425,6 +438,11 @@ function hl_category(name) {
 
 function hl_devices(category) {
 	highlight_scroll($(`tr[data-dev-cat='${category}']`));
+	return false;
+}
+
+function hl_pubkeys(name) {
+	highlight_scroll($(`tr[data-pubkey-name='${name}']`));
 	return false;
 }
 

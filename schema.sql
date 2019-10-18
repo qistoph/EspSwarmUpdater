@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS image (
 	version VERCHAR,
 	filename VARCHAR,
 	signed NUMERIC,
+	pubkey VARCHAR,
 	added INTEGER,
 	last_seen INTEGER
 );

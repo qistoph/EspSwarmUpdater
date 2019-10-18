@@ -269,11 +269,12 @@ class Image(_DBType):
     version = Prop("version", str)
     filename = Prop("filename", str, flags=Prop.flags.READ_ONLY)
     signed = Prop("signed", bool, flags=Prop.flags.READ_ONLY) # TODO: not just yes/no but split yes into valid/invalid
+    pubkey = Prop("pubkey", str, "^\w+$", flags=Prop.flags.READ_ONLY)
     added = Prop("added", float, html_type="datetime", flags=Prop.flags.READ_ONLY)
     last_seen = Prop("last_seen", float, html_type="datetime", flags=Prop.flags.READ_ONLY)
 
     @classmethod
-    def new(cls, md5, description = None, version = None, filename = None, signed = None, added = None, last_seen = None):
+    def new(cls, md5, description = None, version = None, filename = None, signed = None, pubkey = None, added = None, last_seen = None):
         #TODO: maybe find a way to not have write out all props here
         i = Image()
         i.md5 = md5
@@ -281,6 +282,7 @@ class Image(_DBType):
         i.version = version
         i.filename = filename
         i.signed = signed
+        i.pubkey = pubkey
         i.added = added
         i.last_seen = last_seen
         return i
@@ -300,4 +302,3 @@ class PubKey(_DBType):
         p.added = added
         p.data = data
         return p
-

@@ -20,6 +20,8 @@ if sys.version_info[0] != 3 or sys.version_info[1] < 6:
     print("Because of PEP 520 - https://www.python.org/dev/peps/pep-0520/")
     sys.exit(1)
 
+logger = logging.getLogger(__name__)
+
 blueprint = Blueprint('api', __name__)
 api = Api(blueprint)
 
@@ -247,7 +249,16 @@ class ImageList(Resource):# {{{
 
         dest_filename = os.path.join("bin", secure_filename(data["md5"]))
         if os.path.isfile(dest_filename):
-            raise ValueError("Filename (MD5) already in use")
+            raise ValueError(f"Filename ({data['md5']}) already in use")
+
+        if data["signed"]:
+            for pubkey in DB.PubKey.search():
+                if manager.verify_signature(binary, pubkey.data):
+                    logger.info(f'{data["description"]} has valid signature with {pubkey.description}.')
+                    data["pubkey"] = pubkey.description
+                    break
+            else:
+                logger.warning(f'{data["description"]} Signed with unknown key, or invalid signature.')
 
         with open(dest_filename, "wb") as f:
             f.write(binary)
