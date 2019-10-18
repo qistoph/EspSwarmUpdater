@@ -130,7 +130,7 @@ class Device(Resource):# {{{
         d = DB.Device.get(mac)
         d.update(**request.json)
         d.save()
-        new_mac = request.json["mac"]
+        new_mac = d["mac"]
         return self.get(new_mac)
 
     @tools.login_required
@@ -151,7 +151,7 @@ class Category(Resource):# {{{
         c = DB.Category.get(name)
         c.update(**request.json)
         c.save()
-        new_name = request.json["name"]
+        new_name = c["name"]
         return self.get(new_name)
 
     @tools.login_required
@@ -173,7 +173,7 @@ class Image(Resource):# {{{
         i = DB.Image.get(md5)
         i.update(**request.json)
         i.save()
-        new_md5 = request.json["md5"]
+        new_md5 = i["md5"]
         return self.get(new_md5)
 
     @tools.login_required
@@ -200,7 +200,7 @@ class PubKey(Resource):# {{{
         p = DB.PubKey.get(description)
         p.update(**request.json)
         p.save()
-        new_desc = request.json["description"]
+        new_desc = p["description"]
         return self.get(new_desc)
 
     @tools.login_required

@@ -154,7 +154,7 @@
                     </div>`));
 		
 		var dtOpts = {
-			useCurrent: true, // Doesn't do anything?
+			useCurrent: false, // Doesn't do anything?
 			keepOpen: false, // Doesn't do anything?
 			// TODO: support locale? (e.g. {"locale":"nl"})
 		};
@@ -259,6 +259,10 @@
 
 			$.map(unindexed_array, function(n, i){
 				var $input = $(`input[name=${n['name']}]`);
+				if($input.is('[readonly]')) {
+					return; // Skip readonly fields
+				}
+
 				// Special for datetimepicker:
 				if($input.closest("div.input-group").hasClass("date")) {
 					indexed_array[n['name']] = $input.datetimepicker("viewDate").unix();
