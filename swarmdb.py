@@ -135,6 +135,8 @@ class _DBType(dict):
     def update(self, **values):
         for key, val in values.items():
             if hasattr(self, key):
+                if getattr(self.__class__, key).flags & Prop.flags.NO_EDIT:
+                    raise ValueError(f"Edit not allowed on {self.__class__.__name__}.{key}")
                 setattr(self, key, val)
 
 retype = type(re.compile("Hello, world!"))

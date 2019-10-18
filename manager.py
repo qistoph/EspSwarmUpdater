@@ -80,26 +80,14 @@ def search_paginated(cls, offset, limit, orderby, search):
     else:
         return cls.search(matcher=search, order_fields=orderby)[offset:offset+limit]
 
-def update_device(mac, data):
-    ans = table_devices.update(data, where("mac") == mac)
-    return ans
-
 def get_devices(offset = 0, limit = 10, orderby = [], search = {}):
     devs = search_paginated(DB.Device, offset, limit, orderby, search)
     for dev in devs:
         dev["desired_image"] = get_desired_image(dev["mac"])
     return devs
 
-def update_image(md5, data):
-    ans = table_images.update(data, where("md5") == md5)
-    return ans
-
 def get_images(offset = 0, limit = 10, orderby = [], search = {}):
     return search_paginated(DB.Image, offset, limit, orderby, search)
-
-def update_category(name, data):
-    ans = table_categories.update(data, where("name") == name)
-    return ans
 
 def get_categories(offset = 0, limit = 10, orderby = [], search = {}):
     cats = search_paginated(DB.Category, offset, limit, orderby, search)

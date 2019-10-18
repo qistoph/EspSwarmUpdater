@@ -666,8 +666,9 @@ function showEditPrompt(type, isnew, data) {
 			//TODO: fetch paginated part with new entry
 			refresh(type);
 		}).fail(function(xhr) {
+			console.error(xhr);
 			var message = "An error occured while saving. Please try again.";
-			if(xhr.responseJSON.message) {
+			if(xhr.responseJSON && xhr.responseJSON.message) {
 				message = xhr.responseJSON.message;
 			}
 
