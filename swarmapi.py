@@ -306,7 +306,7 @@ class PubKeyList(Resource):
         return redirect(url_for("api.pubkey", description=request.json["description"]))
 
 class ImageBinary(Resource):
-    @tools.login_required
+    # Is used by /check, so don't require login
     def get(self, md5):
         (file_version, file_name, file_md5, file_data) = manager.get_image_data(md5)
         response = make_response(send_file(BytesIO(file_data), as_attachment=True, attachment_filename=file_name))
