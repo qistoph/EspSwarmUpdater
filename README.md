@@ -12,12 +12,12 @@ To help prevent malicious firmware updates, I advise you to [sign your images](h
 - Add field explanation (see popform.templates.modal body)
 - Nicer paginate tables? (inspiration: https://www.datatables.net/)
 - Table sorting/filtering
-- Upload firmware from WebUI (WIP)
 - Move UI definition (html\_\*-fields) from DB to `ui.js`
 - Use MDNSServiceQueryCallback
 - Implement HTTPS
-- Write build server example
+- Write build server example (WIP)
 - Verify signed image signature when added (manager.verify\_signature)
 - Show image description/version instead of hash in devices and categories list
 - Link image in categories list
 - Proper error messages to client on save/delete (WIP)
+- Track failed updates and mark device red after 3 attempts
