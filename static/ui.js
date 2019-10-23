@@ -1,5 +1,5 @@
 'use strict';
-moment.locale('nl-NL'); //TODO: move to application config
+moment.locale('en-US'); //TODO: move to application config
 
 window.labels = {
 	"device": "Device",
