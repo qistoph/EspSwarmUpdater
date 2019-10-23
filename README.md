@@ -10,9 +10,9 @@ Manage updates for your ESP8266 swarm with ease:
 3. Open the management interface
    - http://localhost:5000/
 
-
-
 To help prevent malicious firmware updates, I advise you to [sign your images](https://arduino-esp8266.readthedocs.io/en/latest/ota_updates/readme.html#advanced-security-signed-updates).
+
+![Screenshot](https://raw.githubusercontent.com/qistoph/EspSwarmUpdater/screenshots/screenshots/screenshot1.png)
 
 ## TODO
 - Add field explanation (see popform.templates.modal body)
