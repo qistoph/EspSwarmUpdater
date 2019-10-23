@@ -29,3 +29,5 @@ cp ctags Builder/tools/
 
 
 ./arduino-builder -compile -logger=humantags -hardware hardware/ -libraries libraries/ -tools asdf -fqbn=esp8266com:esp8266:d1_mini:xtal=80,vt=flash,exception=disabled,ssl=all,eesz=4M2M,ip=lm2f,dbg=Serial,lvl=HTTP_UPDATE,wipe=none,baud=921600 -warnings=all -prefs "build.extra_flags=-DESP8266 -DVERSION_STRING=\"Builder-Build\"" -prefs "runtime.tools.ctags.path=/home/lu/Builder/tools" -verbose repos/EspSwarmUpdater/EspSwarmUpdater.ino
+
+http://gitlab.kierenblack.nz/kieren/Arduino_Core_STM32/blob/1f6168462ce2ef0e88578773161956387d938c19/CI/build/arduino-builder.py
