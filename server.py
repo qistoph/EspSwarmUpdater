@@ -72,15 +72,20 @@ def check():
 
     desired_image = manager.get_desired_image(mac)["md5"]
     if desired_image is None:
+        logger.debug(f"Check: ESP {mac} not configured for updates")
         return "ESP MAC not configured for updates", 409
 
     (file_version, file_name, file_md5, file_data) = manager.get_image_data(desired_image)
 
     force_update = False
+    logger.debug(f"Check: ESP {mac} has {sketch_md5}, desired: {file_md5} (force_update: {force_update})")
     if force_update or \
         sketch_md5 != file_md5 or \
         (sketch_md5 is None and current_version is not None and current_version != file_version):
+            logger.info(f"Sending update {desired_image}/{file_md5} to {mac}")
             return swarmapi.ImageBinary.get(None, desired_image)
+    else:
+        logger.debug(f"ESP {mac} with {sketch_md5} does not require update to {desired_image}")
 
     return "", 304
 
