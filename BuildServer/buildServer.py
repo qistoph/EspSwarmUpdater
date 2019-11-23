@@ -22,7 +22,10 @@ category = "Category1b"
 
 api = SwarmApi("http://127.0.0.1:5000/api", "V293LCB5b3UgaGFja2VyISBMT0wgOkQ=")
 
+paths["sketch"] = paths["sketch"].rstrip("/")
 sketch_basename = os.path.basename(paths["sketch"])
+
+print(f"Building {sketch_basename}")
 
 if not os.path.exists(paths["build-path"]):
     os.mkdir(paths["build-path"])
@@ -57,8 +60,8 @@ cmd = [*basecmd, "-compile", paths["sketch"]]
 result = subprocess.run(cmd, stdout=subprocess.PIPE)
 if result.returncode == 0:
 
-    signed_bin = os.path.join(paths["build-path"], sketch_basename+".bin.signed")
-    regular_bin = os.path.join(paths["build-path"], sketch_basename+".bin")
+    signed_bin = os.path.join(paths["build-path"], sketch_basename+".ino.bin.signed")
+    regular_bin = os.path.join(paths["build-path"], sketch_basename+".ino.bin")
 
     if os.path.isfile(signed_bin):
         print("Use signed bin")
@@ -70,6 +73,7 @@ if result.returncode == 0:
     if success:
         data = res.json()
         print("Upload done, MD5:", data['md5'])
+
         (success, res) = api.update_category(category, data['md5'])
         if success:
             print("Category updated")
